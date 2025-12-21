@@ -144,6 +144,12 @@ JSON Data:
 
 Your task is to verify that values mentioned in the markdown text match the values in the JSON section.
 
+CRITICAL: Extract NUMERIC VALUES from markdown before comparing!
+- Ignore formatting: "$", commas, "billion", "million", "thousand", etc.
+- Extract the actual number: "$196.6 billion" → 196.6, "$1,000.00 billion" → 1000.0
+- Compare the extracted numeric value to the JSON numeric value
+- Values match if the numbers are equal (within 0.01 tolerance for floating point)
+
 CHECK THESE SPECIFIC FIELDS FOR ALL DOMAINS:
 - Base facts: capacity_gw, market_size_billions, battery_cost_kwh, qubits, growth_rate
 - Compound growth: compound_growth_10yr values
@@ -153,24 +159,27 @@ CHECK THESE SPECIFIC FIELDS FOR ALL DOMAINS:
 - Rankings: investment_priority_rank, strategic_priority_rank values
 - Scores: risk_adjusted_npv, weighted_investment_score values
 
-TOLERANCE: Consider numeric values consistent if they match within 5% tolerance.
-
 REQUIREMENTS:
 1. For each inconsistency found, provide a SPECIFIC EXAMPLE in the 'specific_examples' list with:
    - field_name: The exact field name (e.g., "renewable_energy.compound_growth_10yr")
-   - markdown_value: The exact value mentioned in markdown (quote the text) or "N/A" if not found
+   - markdown_value: The EXTRACTED NUMERIC VALUE from markdown (not the formatted string)
    - json_value: The exact value from JSON
    - description: Brief explanation of the conflict (e.g., "Markdown value differs from JSON")
 
-2. In 'inconsistencies', list each conflict as a clear sentence (e.g., "Markdown states 8433.21 but JSON shows 8000.00")
+2. In 'inconsistencies', list each conflict as a clear sentence showing the extracted numeric comparison (e.g., "Markdown states 8433.21 but JSON shows 8000.00")
 
 3. In 'reasoning', explain:
-   - Your methodology for checking consistency
+   - Your methodology for extracting numeric values from formatted markdown text
    - How you searched the markdown for values
-   - How you compared markdown to JSON
+   - How you compared extracted numeric values to JSON values
    - Overall assessment of consistency across all domains and fields
 
-4. Set 'consistency_score' to 1.0 if all values match, decreasing proportionally for each inconsistency found.
+4. Set 'consistency_score' to 1.0 if all extracted numeric values match JSON values, decreasing proportionally for each real inconsistency found.
+
+5. DO NOT flag values as inconsistent if they match after extracting the numeric value. For example:
+   - "$196.6 billion" in markdown vs 196.6 in JSON → CONSISTENT
+   - "$1,000.00 billion" in markdown vs 1000.0 in JSON → CONSISTENT
+   - "$1,112.82 million" in markdown vs 1112.82 in JSON → CONSISTENT
 
 Be thorough and specific - check ALL statistics, not just growth rates. A human reviewer needs to be able to verify your findings."""
 

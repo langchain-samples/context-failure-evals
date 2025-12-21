@@ -35,21 +35,23 @@ standard_agent = create_standard_agent(llm)
 
 def build_reference_outputs(task: Dict[str, Any]) -> Dict[str, Any]:
     """Build reference outputs with all expected values."""
+    expected_tool_calls = generate_expected_tool_calls(
+        topics=task["topics"],
+        stats_count=task.get("stats_count", 5),
+        expert_count=task.get("expert_count", 3),
+        case_count=task.get("case_count", 2),
+        year_count=task.get("year_count", 3),
+        compare_count=task.get("compare_count", 2),
+    )
+    
     return {
-        "topics": task["topics"],
         "expected_steps": task["expected_steps"],
         "recall_questions": task["recall_questions"],
         "expected_answers": task.get("expected_answers", {}),
         "primary_domain": task.get("primary_domain", "renewable_energy"),
         "secondary_domain": task.get("secondary_domain", "artificial_intelligence"),
-        "expected_tool_calls": generate_expected_tool_calls(
-            topics=task["topics"],
-            stats_count=task.get("stats_count", 5),
-            expert_count=task.get("expert_count", 3),
-            case_count=task.get("case_count", 2),
-            year_count=task.get("year_count", 3),
-            compare_count=task.get("compare_count", 2),
-        ),
+        "expected_tool_calls": expected_tool_calls,
+        "expected_tool_calls_count": len(expected_tool_calls),
         "expected_calculations": {
             domain: {
                 "base_facts": BASE_FACTS.get(domain, {}),
@@ -79,9 +81,11 @@ def create_or_get_dataset(dataset_name: str, tasks: List[Dict[str, Any]] = None)
             description="Research tasks of varying complexity"
         )
     
+    # Get existing examples to avoid duplicates
     existing_examples = list(client.list_examples(dataset_id=dataset.id))
     existing_queries = {ex.inputs.get("query") for ex in existing_examples}
     
+    # Only add examples that don't already exist
     for task in tasks:
         if task["query"] not in existing_queries:
             client.create_example(
@@ -161,27 +165,43 @@ def consistency_evaluator(inputs: Dict[str, Any], outputs: Dict[str, Any], refer
 def task_completion_evaluator(inputs: Dict[str, Any], outputs: Dict[str, Any], reference_outputs: Dict[str, Any]) -> Dict[str, Any]:
     """Evaluate task completion by comparing tool calls with expected."""
     expected_tool_calls = reference_outputs.get("expected_tool_calls", [])
-    if not expected_tool_calls:
-        return {"key": "task_completion", "score": 0.0, "comment": "No expected tool calls"}
-    
     actual_tool_calls = outputs.get("tool_calls", [])
+    if not actual_tool_calls and expected_tool_calls:
+        return {"key": "task_completion", "score": 0.0, "comment": f"No tool calls found in output. Available keys: {list(outputs.keys())}"}
+    
+    # Check that each expected tool call with matching args appears somewhere
     result = compare_tool_calls(
         actual_tool_calls,
         expected_tool_calls,
         strict_order=False
     )
     
+    # Check total count is within 2.5% tolerance
+    expected_count = reference_outputs.get("expected_tool_calls_count", len(expected_tool_calls))
+    actual_count = len(actual_tool_calls)
+    tolerance = 0.025  # 2.5%
+    count_diff = abs(actual_count - expected_count) / expected_count if expected_count > 0 else 1.0
+    count_within_tolerance = count_diff <= tolerance
+    
+    # Combined score: 70% for presence of expected calls, 30% for count tolerance
+    presence_score = result["score"]
+    count_score = 1.0 if count_within_tolerance else max(0.0, 1.0 - (count_diff - tolerance) / tolerance)
+    combined_score = 0.7 * presence_score + 0.3 * count_score
+    
     unmatched_indices = result.get("unmatched_indices", [])
-    comment = f"{result['matched_steps']}/{result['total_expected']} expected tool calls with matching arguments found"
+    comment_parts = [
+        f"Presence: {result['matched_steps']}/{result['total_expected']} expected tool calls found",
+        f"Count: {actual_count} actual vs {expected_count} expected ({'✓' if count_within_tolerance else '✗'} within 2.5% tolerance)"
+    ]
     if unmatched_indices:
-        comment += f"\nUnmatched expected indices: {unmatched_indices[:20]}"
+        comment_parts.append(f"Unmatched expected indices: {unmatched_indices[:20]}")
         if len(unmatched_indices) > 20:
-            comment += f" (and {len(unmatched_indices) - 20} more)"
+            comment_parts.append(f"  (and {len(unmatched_indices) - 20} more)")
     
     return {
         "key": "task_completion",
-        "score": result["score"],
-        "comment": comment,
+        "score": min(combined_score, 1.0),
+        "comment": "\n".join(comment_parts),
     }
 
 def extract_tool_calls_from_message(msg: Any) -> List[Dict[str, Any]]:
@@ -223,8 +243,11 @@ def run_agent_with_tool_calls(agent, query: str) -> dict:
                 final_response = msg["content"]
             elif hasattr(msg, 'content') and msg.content:
                 final_response = msg.content
+        
+        print(f"  Extracted {len(tool_calls_list)} tool calls")
         return {"final_response": final_response, "tool_calls": tool_calls_list}
     except Exception as e:
+        print(f"  ERROR: {e}")
         return {"final_response": f"ERROR: {e}", "tool_calls": tool_calls_list}
 
 experiment = evaluate(
@@ -235,22 +258,3 @@ experiment = evaluate(
     metadata={"agent_type": "standard", "model": "gpt-4o-mini"},
     max_concurrency=1,
 )
-
-# Display summary
-results = list(experiment)
-if results:
-    scores = {
-        "recall": [r.get("recall_accuracy", {}).get("score", 0) for r in results],
-        "consistency": [r.get("consistency_score", {}).get("score", 0) for r in results],
-        "completion": [r.get("task_completion", {}).get("score", 0) for r in results],
-    }
-    averages = {k: sum(v) / len(v) if v else 0 for k, v in scores.items()}
-    
-    print(f"\n{'='*80}")
-    print(f"SUMMARY - {len(results)} Tasks")
-    print(f"{'='*80}")
-    print(f"  Recall: {averages['recall']:.1%} | Consistency: {averages['consistency']:.1%} | Completion: {averages['completion']:.1%}")
-    
-    if averages['recall'] < 0.5 or averages['consistency'] < 0.7:
-        print(f"\n⚠️  CONTEXT DISTRACTION DETECTED")
-
