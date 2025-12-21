@@ -25,8 +25,8 @@ from context_distraction.resources.validation_utils import (
     get_value_from_calculations,
     compare_values,
     check_consistency_with_llm,
-    generate_expected_trajectory,
-    compare_trajectory_order,
+    generate_expected_tool_calls,
+    compare_tool_calls,
 )
 
 client = Client()
@@ -42,7 +42,7 @@ def build_reference_outputs(task: Dict[str, Any]) -> Dict[str, Any]:
         "expected_answers": task.get("expected_answers", {}),
         "primary_domain": task.get("primary_domain", "renewable_energy"),
         "secondary_domain": task.get("secondary_domain", "artificial_intelligence"),
-        "expected_trajectory": generate_expected_trajectory(
+        "expected_tool_calls": generate_expected_tool_calls(
             topics=task["topics"],
             stats_count=task.get("stats_count", 5),
             expert_count=task.get("expert_count", 3),
@@ -130,42 +130,49 @@ def consistency_evaluator(inputs: Dict[str, Any], outputs: Dict[str, Any], refer
     final_response = outputs.get("final_response", "")
     calculations_data = extract_calculations_json(final_response)
     result = check_consistency_with_llm(final_response, calculations_data)
+    
+    # Build detailed comment with specific examples
+    comment_parts = []
+    if result['is_consistent']:
+        comment_parts.append("Consistent")
+    else:
+        comment_parts.append(f"Inconsistent: {len(result.get('inconsistencies', []))} conflicts found")
+    
+    # Add specific examples
+    examples = result.get('specific_examples', [])
+    if examples:
+        comment_parts.append("\nSpecific conflicts:")
+        for i, ex in enumerate(examples[:5], 1):  # Limit to first 5 for readability
+            comment_parts.append(f"{i}. {ex.get('field_name', 'unknown')}: markdown={ex.get('markdown_value', 'N/A')}, json={ex.get('json_value', 'N/A')}")
+        if len(examples) > 5:
+            comment_parts.append(f"... and {len(examples) - 5} more")
+    
+    # Add reasoning summary (first 200 chars)
+    reasoning = result.get('reasoning', '')
+    if reasoning:
+        comment_parts.append(f"\nReasoning: {reasoning[:200]}...")
+    
     return {
         "key": "consistency_score",
         "score": result['score'],
-        "comment": "Consistent" if result['is_consistent'] else "Inconsistent",
+        "comment": "\n".join(comment_parts),
     }
 
 def task_completion_evaluator(inputs: Dict[str, Any], outputs: Dict[str, Any], reference_outputs: Dict[str, Any]) -> Dict[str, Any]:
-    """Evaluate task completion by comparing trajectory with expected."""
-    expected_trajectory = reference_outputs.get("expected_trajectory", [])
-    if not expected_trajectory:
-        return {"key": "task_completion", "score": 0.0, "comment": "No expected trajectory"}
+    """Evaluate task completion by comparing tool calls with expected."""
+    expected_tool_calls = reference_outputs.get("expected_tool_calls", [])
+    if not expected_tool_calls:
+        return {"key": "task_completion", "score": 0.0, "comment": "No expected tool calls"}
     
-    actual_trajectory = outputs.get("trajectory", [])
-    result = compare_trajectory_order(
-        actual_trajectory,
-        expected_trajectory,
+    actual_tool_calls = outputs.get("tool_calls", [])
+    result = compare_tool_calls(
+        actual_tool_calls,
+        expected_tool_calls,
         strict_order=False
     )
     
-    # Find unmatched indices by tracking which expected tools weren't matched
-    from collections import Counter
-    actual_tool_names = [tc.get("name", "") for tc in actual_trajectory]
-    expected_tool_names = [tc.get("name", "") for tc in expected_trajectory]
-    
-    actual_counter = Counter(actual_tool_names)
-    
-    # Track which expected indices weren't matched
-    unmatched_indices = []
-    tool_match_counts = Counter()
-    
-    for idx, expected_name in enumerate(expected_tool_names):
-        tool_match_counts[expected_name] += 1
-        if tool_match_counts[expected_name] > actual_counter.get(expected_name, 0):
-            unmatched_indices.append(idx)
-    
-    comment = f"{result['matched_steps']}/{result['total_expected']} steps"
+    unmatched_indices = result.get("unmatched_indices", [])
+    comment = f"{result['matched_steps']}/{result['total_expected']} expected tool calls with matching arguments found"
     if unmatched_indices:
         comment += f"\nUnmatched expected indices: {unmatched_indices[:20]}"
         if len(unmatched_indices) > 20:
@@ -197,9 +204,9 @@ def extract_tool_calls_from_message(msg: Any) -> List[Dict[str, Any]]:
     
     return tool_calls
 
-def run_agent_with_trajectory(agent, query: str) -> dict:
+def run_agent_with_tool_calls(agent, query: str) -> dict:
     """Run agent and return structured output, printing progress."""
-    trajectory = []
+    tool_calls_list = []
     final_response = ""
     
     try:
@@ -209,19 +216,19 @@ def run_agent_with_trajectory(agent, query: str) -> dict:
         for msg in messages:
             tool_calls = extract_tool_calls_from_message(msg)
             for tc in tool_calls:
-                trajectory.append(tc)
+                tool_calls_list.append(tc)
             
             # Get final response
             if isinstance(msg, dict) and msg.get("content"):
                 final_response = msg["content"]
             elif hasattr(msg, 'content') and msg.content:
                 final_response = msg.content
-        return {"final_response": final_response, "trajectory": trajectory}
+        return {"final_response": final_response, "tool_calls": tool_calls_list}
     except Exception as e:
-        return {"final_response": f"ERROR: {e}", "trajectory": trajectory}
+        return {"final_response": f"ERROR: {e}", "tool_calls": tool_calls_list}
 
 experiment = evaluate(
-    lambda inputs: run_agent_with_trajectory(standard_agent, inputs["query"]),
+    lambda inputs: run_agent_with_tool_calls(standard_agent, inputs["query"]),
     data=dataset_name,
     evaluators=[recall_accuracy_evaluator, consistency_evaluator, task_completion_evaluator],
     experiment_prefix="context-distraction-standard-agent",

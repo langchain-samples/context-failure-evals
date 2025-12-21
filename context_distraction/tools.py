@@ -344,7 +344,7 @@ def get_case_study(topic: str, case_study_id: Optional[str] = None) -> Dict[str,
 
 
 @tool
-def compare_topics(topic1: str, topic2: str, comparison_aspects: Optional[List[str]] = None) -> Dict[str, Any]:
+def compare_topics(topic1: str, topic2: str) -> Dict[str, Any]:
     """
     Compare two topics across multiple dimensions.
     
@@ -997,6 +997,191 @@ analysis_tools = [
     synthesize_research,
 ]
 
+# =====================================================
+# ATOMIC MATH TOOLS
+# =====================================================
+
+@tool
+def calculate_discount_factor(discount_rate: float, year: int) -> Dict[str, Any]:
+    """
+    Calculate discount factor for a specific year.
+    Atomic math operation: 1 / (1 + r)^n
+    
+    Args:
+        discount_rate: Discount rate as decimal (e.g., 0.10 for 10%)
+        year: Year number (1, 2, 3, ...)
+    
+    Returns:
+        Discount factor and calculation details
+    """
+    discount_factor = 1 / ((1 + discount_rate) ** year)
+    return {
+        "ok": True,
+        "discount_factor": round(discount_factor, 6),
+        "discount_rate": discount_rate,
+        "year": year,
+        "formula": f"1 / (1 + {discount_rate})^{year} = {round(discount_factor, 6)}"
+    }
+
+
+@tool
+def calculate_present_value(future_value: float, discount_rate: float, year: int) -> Dict[str, Any]:
+    """
+    Calculate present value of a future cash flow.
+    Atomic math operation: PV = FV / (1 + r)^n
+    
+    Args:
+        future_value: Future cash flow amount
+        discount_rate: Discount rate as decimal
+        year: Year when cash flow occurs
+    
+    Returns:
+        Present value and calculation details
+    """
+    discount_factor = 1 / ((1 + discount_rate) ** year)
+    present_value = future_value * discount_factor
+    return {
+        "ok": True,
+        "present_value": round(present_value, 2),
+        "future_value": future_value,
+        "discount_rate": discount_rate,
+        "year": year,
+        "discount_factor": round(discount_factor, 6),
+        "formula": f"{future_value} / (1 + {discount_rate})^{year} = {round(present_value, 2)}"
+    }
+
+
+@tool
+def calculate_percentage(value: float, total: float) -> Dict[str, Any]:
+    """
+    Calculate percentage: (value / total) * 100
+    Atomic math operation for percentages.
+    
+    Args:
+        value: The value to calculate percentage of
+        total: The total/base value
+    
+    Returns:
+        Percentage and calculation details
+    """
+    if total == 0:
+        return {"ok": False, "error": "Cannot divide by zero"}
+    percentage = (value / total) * 100
+    return {
+        "ok": True,
+        "percentage": round(percentage, 2),
+        "value": value,
+        "total": total,
+        "formula": f"({value} / {total}) × 100 = {round(percentage, 2)}%"
+    }
+
+
+@tool
+def calculate_weighted_average(values: List[float], weights: List[float]) -> Dict[str, Any]:
+    """
+    Calculate weighted average: Σ(value × weight) / Σ(weights)
+    Atomic math operation for weighted calculations.
+    
+    Args:
+        values: List of values
+        weights: List of corresponding weights
+    
+    Returns:
+        Weighted average and calculation details
+    """
+    if len(values) != len(weights):
+        return {"ok": False, "error": "Values and weights must have same length"}
+    if len(values) == 0:
+        return {"ok": False, "error": "Empty lists"}
+    
+    weighted_sum = sum(v * w for v, w in zip(values, weights))
+    total_weight = sum(weights)
+    
+    if total_weight == 0:
+        return {"ok": False, "error": "Total weight cannot be zero"}
+    
+    weighted_avg = weighted_sum / total_weight
+    
+    return {
+        "ok": True,
+        "weighted_average": round(weighted_avg, 4),
+        "weighted_sum": round(weighted_sum, 2),
+        "total_weight": round(total_weight, 2),
+        "components": [{"value": v, "weight": w, "contribution": round(v * w, 2)} for v, w in zip(values, weights)],
+        "formula": f"Σ(value × weight) / Σ(weights) = {round(weighted_sum, 2)} / {round(total_weight, 2)} = {round(weighted_avg, 4)}"
+    }
+
+
+@tool
+def calculate_ratio(numerator: float, denominator: float) -> Dict[str, Any]:
+    """
+    Calculate ratio: numerator / denominator
+    Atomic math operation for ratios.
+    
+    Args:
+        numerator: Numerator value
+        denominator: Denominator value
+    
+    Returns:
+        Ratio and calculation details
+    """
+    if denominator == 0:
+        return {"ok": False, "error": "Cannot divide by zero"}
+    ratio = numerator / denominator
+    return {
+        "ok": True,
+        "ratio": round(ratio, 4),
+        "numerator": numerator,
+        "denominator": denominator,
+        "formula": f"{numerator} / {denominator} = {round(ratio, 4)}"
+    }
+
+
+@tool
+def calculate_power(base: float, exponent: float) -> Dict[str, Any]:
+    """
+    Calculate power: base^exponent
+    Atomic math operation for exponentiation.
+    
+    Args:
+        base: Base value
+        exponent: Exponent value
+    
+    Returns:
+        Power result and calculation details
+    """
+    result = base ** exponent
+    return {
+        "ok": True,
+        "result": round(result, 6),
+        "base": base,
+        "exponent": exponent,
+        "formula": f"{base}^{exponent} = {round(result, 6)}"
+    }
+
+
+@tool
+def calculate_sum(values: List[float]) -> Dict[str, Any]:
+    """
+    Calculate sum of a list of values.
+    Atomic math operation for summation.
+    
+    Args:
+        values: List of numeric values to sum
+    
+    Returns:
+        Sum and calculation details
+    """
+    total = sum(values)
+    return {
+        "ok": True,
+        "sum": round(total, 2),
+        "values": values,
+        "count": len(values),
+        "formula": f"Sum of {len(values)} values = {round(total, 2)}"
+    }
+
+
 calculation_tools = [
     calculate_compound_growth,
     calculate_market_share,
@@ -1005,5 +1190,15 @@ calculation_tools = [
     aggregate_statistics,
 ]
 
-all_research_tools = core_research_tools + analysis_tools + calculation_tools
+atomic_math_tools = [
+    calculate_discount_factor,
+    calculate_present_value,
+    calculate_percentage,
+    calculate_weighted_average,
+    calculate_ratio,
+    calculate_power,
+    calculate_sum,
+]
+
+all_research_tools = core_research_tools + analysis_tools + calculation_tools + atomic_math_tools
 

@@ -23,26 +23,28 @@ BASE_TASK_QUERY = """You are leading a multi-billion dollar investment analysis 
 
 Research domains: {domains}.
 
-For EVERY domain, you MUST perform ALL of the following (this is mandatory - use atomic operations):
-1. Research topic comprehensively (use research_topic with depth: comprehensive)
-2. Extract {stats_count} key statistics individually (use get_statistics {stats_count} times, once per metric)
-3. Get {expert_count} expert opinions individually (use get_expert_opinion {expert_count} times, once per expert)
-4. Analyze {case_count} case studies individually (use get_case_study {case_count} times, once per case)
-5. Get historical data for {year_count} key years (use get_year_data for years {years} - {year_count} calls)
-6. Calculate compound growth for 10-year forecast (use calculate_compound_growth with years=10)
-7. Perform market share analysis (use calculate_market_share with market_segments)
-8. Run correlation analysis between market size and growth rate (use analyze_correlation)
-9. Calculate CBA with 10% discount rate (use calculate_cost_benefit_analysis with discount_rate=0.10)
-10. Aggregate statistics by region (use aggregate_statistics with group_by="region")
-11. Compare this domain with {compare_count} other domains (use compare_topics {compare_count} times)
-12. Synthesize research findings (use synthesize_research)
+For each domain, conduct comprehensive research including:
+- Gathering key statistics and market data
+- Consulting multiple expert opinions
+- Analyzing relevant case studies
+- Reviewing historical trends across key years
+- Calculating compound growth projections (10-year forecast)
+- Performing market share analysis
+- Running correlation analyses between market size and growth rates
+- Conducting cost-benefit analysis with 10% discount rate
+- Aggregating statistics by region
+- Comparing domains against each other
+- Synthesizing comprehensive research findings
 
-After completing ALL operations for ALL domains, create a final synthesis that:
-- Compares all domains across multiple dimensions using ALL collected data
-- Performs investment portfolio optimization using NPV rankings from ALL CBA calculations
-- Provides geographic market aggregation showing regional patterns from ALL aggregations
-- Creates financial projections using ALL compound growth calculations
-- Calculates risk-adjusted return metrics using ALL correlation analyses
+After completing research for all domains, create a final synthesis that:
+- Compares all domains across multiple dimensions
+- Performs investment portfolio optimization using NPV rankings
+- Provides geographic market aggregation showing regional patterns
+- Creates financial projections using compound growth calculations
+- Calculates risk-adjusted return metrics
+
+IMPORTANT: Your analysis must answer these specific questions:
+{recall_questions}
 
 CRITICAL OUTPUT FORMAT:
 Your final response MUST be valid Markdown with a JSON section at the end containing ALL calculated values in this exact structure:
@@ -65,7 +67,7 @@ Your final response MUST be valid Markdown with a JSON section at the end contai
 }}
 ```
 
-This requires ~{expected_steps} operations: research, calculations, aggregations, and analysis. Be thorough and complete EVERY step."""
+Be thorough and ensure all calculations are accurate and complete."""
 
 # Test task variations - each focuses on different primary domains
 TEST_TASKS = [
@@ -76,13 +78,18 @@ TEST_TASKS = [
         "query": BASE_TASK_QUERY.format(
             num_domains=5,
             domains="renewable energy, artificial intelligence, electric vehicles, quantum computing, and biotechnology",
-            stats_count=5,
-            expert_count=3,
-            case_count=2,
-            year_count=3,
-            years="2014, 2019, 2024",
-            compare_count=2,
-            expected_steps=60,
+            recall_questions="\n".join([
+                "1. What was the global installed capacity in gigawatts for renewable energy?",
+                "2. What is the global AI market size in billions of USD?",
+                "3. What was the calculated 10-year compound growth final value for renewable energy?",
+                "4. What was the NPV calculated for renewable energy CBA with 10% discount rate?",
+                "5. What correlation coefficient was calculated between renewable energy market size and growth rate?",
+                "6. What was the market share percentage for the top segment in renewable energy?",
+                "7. What was the investment priority ranking for renewable energy based on weighted scores?",
+                "8. What was the risk-adjusted NPV for renewable energy?",
+                "9. What was the weighted investment score calculated for renewable energy?",
+                "10. What was the strategic priority ranking for renewable energy in your final analysis?",
+            ]),
         ),
         "topics": [
             "renewable_energy", "artificial_intelligence", "electric_vehicles",
@@ -126,13 +133,18 @@ TEST_TASKS = [
         "query": BASE_TASK_QUERY.format(
             num_domains=5,
             domains="renewable energy, artificial intelligence, electric vehicles, quantum computing, and biotechnology",
-            stats_count=6,
-            expert_count=4,
-            case_count=3,
-            year_count=4,
-            years="2010, 2015, 2020, 2024",
-            compare_count=2,
-            expected_steps=75,
+            recall_questions="\n".join([
+                "1. What was the battery cost per kWh for electric vehicles?",
+                "2. What is the global biotechnology market size in billions of USD?",
+                "3. What was the calculated 10-year compound growth final value for electric vehicles?",
+                "4. What was the NPV calculated for electric vehicles CBA with 10% discount rate?",
+                "5. What correlation coefficient was calculated between electric vehicles market size and growth rate?",
+                "6. What was the market share percentage for the top segment in electric vehicles?",
+                "7. What was the investment priority ranking for electric vehicles based on weighted scores?",
+                "8. What was the risk-adjusted NPV for electric vehicles?",
+                "9. What was the weighted investment score calculated for electric vehicles?",
+                "10. What was the strategic priority ranking for electric vehicles in your final analysis?",
+            ]),
         ),
         "topics": [
             "renewable_energy", "artificial_intelligence", "electric_vehicles",
@@ -176,13 +188,18 @@ TEST_TASKS = [
         "query": BASE_TASK_QUERY.format(
             num_domains=6,
             domains="renewable energy, artificial intelligence, electric vehicles, quantum computing, biotechnology, and space exploration",
-            stats_count=5,
-            expert_count=3,
-            case_count=2,
-            year_count=3,
-            years="2014, 2019, 2024",
-            compare_count=3,
-            expected_steps=78,
+            recall_questions="\n".join([
+                "1. What was the number of qubits for quantum computing?",
+                "2. What is the global AI market size in billions of USD?",
+                "3. What was the calculated 10-year compound growth final value for quantum computing?",
+                "4. What was the NPV calculated for quantum computing CBA with 10% discount rate?",
+                "5. What correlation coefficient was calculated between quantum computing market size and growth rate?",
+                "6. What was the market share percentage for the top segment in quantum computing?",
+                "7. What was the investment priority ranking for quantum computing based on weighted scores?",
+                "8. What was the risk-adjusted NPV for quantum computing?",
+                "9. What was the weighted investment score calculated for quantum computing?",
+                "10. What was the strategic priority ranking for quantum computing in your final analysis?",
+            ]),
         ),
         "topics": [
             "renewable_energy", "artificial_intelligence", "electric_vehicles",
@@ -221,13 +238,18 @@ TEST_TASKS = [
         "query": BASE_TASK_QUERY.format(
             num_domains=5,
             domains="renewable energy, artificial intelligence, electric vehicles, quantum computing, and biotechnology",
-            stats_count=7,
-            expert_count=5,
-            case_count=4,
-            year_count=5,
-            years="2009, 2014, 2019, 2022, 2024",
-            compare_count=3,
-            expected_steps=90,
+            recall_questions="\n".join([
+                "1. What is the global biotechnology market size in billions of USD?",
+                "2. What was the global installed capacity in gigawatts for renewable energy?",
+                "3. What was the calculated 10-year compound growth final value for biotechnology?",
+                "4. What was the NPV calculated for biotechnology CBA with 10% discount rate?",
+                "5. What correlation coefficient was calculated between biotechnology market size and growth rate?",
+                "6. What was the market share percentage for the top segment in biotechnology?",
+                "7. What was the investment priority ranking for biotechnology based on weighted scores?",
+                "8. What was the risk-adjusted NPV for biotechnology?",
+                "9. What was the weighted investment score calculated for biotechnology?",
+                "10. What was the strategic priority ranking for biotechnology in your final analysis?",
+            ]),
         ),
         "topics": [
             "renewable_energy", "artificial_intelligence", "electric_vehicles",

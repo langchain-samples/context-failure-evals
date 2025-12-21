@@ -24,6 +24,7 @@ RESEARCH_TOPICS = {
         "statistics": {
             "global_capacity_gw": 3372,
             "annual_growth_rate_percent": 9.6,
+            "global_market_billions_usd": 1200,
             "investment_billions_usd": 358,
             "jobs_created_millions": 13.7,
             "co2_reduction_mt": 2300
@@ -48,6 +49,7 @@ RESEARCH_TOPICS = {
         "statistics": {
             "global_ai_market_billions_usd": 196.6,
             "annual_growth_rate_percent": 31.2,
+            "investment_billions_usd": 95.2,
             "ai_startups_founded": 8500,
             "ai_patents_filed": 780000,
             "ai_researchers_worldwide": 22000
@@ -96,6 +98,8 @@ RESEARCH_TOPICS = {
         "statistics": {
             "qubits_achieved": 1121,
             "quantum_computers_built": 47,
+            "global_market_billions_usd": 8.5,
+            "annual_growth_rate_percent": 35.0,
             "investment_billions_usd": 30,
             "patents_filed": 12000,
             "research_papers_published": 45000
@@ -120,6 +124,8 @@ RESEARCH_TOPICS = {
         "statistics": {
             "global_market_billions_usd": 1023,
             "annual_growth_rate_percent": 13.9,
+            "investment_billions_usd": 180,
+            "patents_filed": 45000,
             "fda_approvals_2023": 55,
             "clinical_trials_active": 12000,
             "biotech_companies": 8000
@@ -193,6 +199,9 @@ RESEARCH_TOPICS = {
             "evs_on_road_millions": 40,
             "charging_stations_global": 2.7,
             "battery_cost_per_kwh": 139,
+            "annual_growth_rate_percent": 20.0,
+            "global_market_billions_usd": 450,
+            "investment_billions_usd": 120,
             "market_share_percent": 18,
             "co2_reduction_mt": 50
         },

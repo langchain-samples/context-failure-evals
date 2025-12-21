@@ -14,37 +14,39 @@ Complexity levels:
 """
 
 # Base facts from research data (these are the "tables" we'll join)
+# Values must match mock_research_data.py RESEARCH_TOPICS statistics exactly
+# All fields are available in research data for agent retrieval
 BASE_FACTS = {
     "renewable_energy": {
-        "capacity_gw": 3372,
-        "growth_rate": 0.15,  # 15% annual growth
-        "market_size_billions": 1200,
-        "investment_billions": 358,
-        "jobs_millions": 13.7,
+        "capacity_gw": 3372,  # global_capacity_gw
+        "growth_rate": 0.096,  # annual_growth_rate_percent: 9.6 -> 0.096
+        "market_size_billions": 1200,  # global_market_billions_usd
+        "investment_billions": 358,  # investment_billions_usd
+        "jobs_millions": 13.7,  # jobs_created_millions
     },
     "artificial_intelligence": {
-        "market_size_billions": 196.6,
-        "growth_rate": 0.25,  # 25% annual growth
-        "investment_billions": 95.2,
-        "patents_thousands": 780,
+        "market_size_billions": 196.6,  # global_ai_market_billions_usd
+        "growth_rate": 0.312,  # annual_growth_rate_percent: 31.2 -> 0.312
+        "investment_billions": 95.2,  # investment_billions_usd
+        "patents_thousands": 780,  # ai_patents_filed: 780000 -> 780
     },
     "electric_vehicles": {
-        "battery_cost_kwh": 139,
-        "growth_rate": 0.20,  # 20% annual growth
-        "market_size_billions": 450,
-        "investment_billions": 120,
+        "battery_cost_kwh": 139,  # battery_cost_per_kwh
+        "growth_rate": 0.20,  # annual_growth_rate_percent: 20.0 -> 0.20
+        "market_size_billions": 450,  # global_market_billions_usd
+        "investment_billions": 120,  # investment_billions_usd
     },
     "quantum_computing": {
-        "qubits": 1121,
-        "market_size_billions": 8.5,
-        "growth_rate": 0.35,
-        "investment_billions": 30,
+        "qubits": 1121,  # qubits_achieved
+        "market_size_billions": 8.5,  # global_market_billions_usd
+        "growth_rate": 0.35,  # annual_growth_rate_percent: 35.0 -> 0.35
+        "investment_billions": 30,  # investment_billions_usd
     },
     "biotechnology": {
-        "market_size_billions": 1023,
-        "growth_rate": 0.12,
-        "investment_billions": 180,
-        "patents_thousands": 45,
+        "market_size_billions": 1023,  # global_market_billions_usd
+        "growth_rate": 0.139,  # annual_growth_rate_percent: 13.9 -> 0.139
+        "investment_billions": 180,  # investment_billions_usd
+        "patents_thousands": 45,  # patents_filed: 45000 -> 45
     },
 }
 

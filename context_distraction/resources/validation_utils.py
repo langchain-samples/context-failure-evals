@@ -19,15 +19,20 @@ def extract_calculations_json(response: str) -> Dict[str, Any]:
     
     Returns empty dict if JSON is missing or invalid (format validation handled by JSON parsing).
     """
+    # Try to find JSON code block first
     json_match = re.search(r'```json\s*(\{.*?\})\s*```', response, re.DOTALL)
     if not json_match:
+        # Try to find JSON starting with {"calculations" - match until balanced braces
         json_match = re.search(r'(\{"calculations".*?\})', response, re.DOTALL)
     
     if json_match:
         try:
-            return json.loads(json_match.group(1)).get("calculations", {})
+            json_str = json_match.group(1)
+            # Try to parse the JSON
+            data = json.loads(json_str)
+            return data.get("calculations", {})
         except json.JSONDecodeError:
-            pass  # Invalid JSON format - handled by parsing error
+            pass
     return {}
 
 
@@ -114,9 +119,10 @@ def compare_values(actual_value: Any, expected_value: str, tolerance: float = 0.
 class ConsistencyCheck(TypedDict):
     """Check if markdown and JSON are consistent."""
     is_consistent: Annotated[bool, "True if markdown and JSON values match"]
-    inconsistencies: Annotated[list, "List of inconsistencies found"]
+    inconsistencies: Annotated[List[str], "List of specific inconsistencies found with exact values from both sources"]
     consistency_score: Annotated[float, "Score from 0.0 to 1.0"]
-    reasoning: Annotated[str, "Brief explanation of consistency check"]
+    reasoning: Annotated[str, "Detailed explanation of consistency check, including methodology"]
+    specific_examples: Annotated[List[Dict[str, str]], "List of specific examples showing conflicts, each with 'markdown_value', 'json_value', 'field_name', and 'description'"]
 
 
 def check_consistency_with_llm(
@@ -136,16 +142,37 @@ Markdown Content:
 JSON Data:
 {json.dumps(calculations_json, indent=2)[:2000]}
 
-Check if the values mentioned in the markdown text match the values in the JSON section. 
-Look for:
-- Base facts (capacity, market size)
-- Calculated values (compound growth, NPV, ROI)
-- Correlation coefficients
-- Market share percentages
-- Rankings and scores
+Your task is to verify that values mentioned in the markdown text match the values in the JSON section.
 
-Consider values consistent if they match within 5% tolerance for numeric values.
-Report any inconsistencies you find."""
+CHECK THESE SPECIFIC FIELDS FOR ALL DOMAINS:
+- Base facts: capacity_gw, market_size_billions, battery_cost_kwh, qubits, growth_rate
+- Compound growth: compound_growth_10yr values
+- CBA: cba_10pct.npv and cba_10pct.roi values
+- Correlations: correlation_market_size_vs_growth values
+- Market share: market_share_top_segment_percent values
+- Rankings: investment_priority_rank, strategic_priority_rank values
+- Scores: risk_adjusted_npv, weighted_investment_score values
+
+TOLERANCE: Consider numeric values consistent if they match within 5% tolerance.
+
+REQUIREMENTS:
+1. For each inconsistency found, provide a SPECIFIC EXAMPLE in the 'specific_examples' list with:
+   - field_name: The exact field name (e.g., "renewable_energy.compound_growth_10yr")
+   - markdown_value: The exact value mentioned in markdown (quote the text) or "N/A" if not found
+   - json_value: The exact value from JSON
+   - description: Brief explanation of the conflict (e.g., "Markdown value differs from JSON")
+
+2. In 'inconsistencies', list each conflict as a clear sentence (e.g., "Markdown states 8433.21 but JSON shows 8000.00")
+
+3. In 'reasoning', explain:
+   - Your methodology for checking consistency
+   - How you searched the markdown for values
+   - How you compared markdown to JSON
+   - Overall assessment of consistency across all domains and fields
+
+4. Set 'consistency_score' to 1.0 if all values match, decreasing proportionally for each inconsistency found.
+
+Be thorough and specific - check ALL statistics, not just growth rates. A human reviewer needs to be able to verify your findings."""
 
     try:
         result = judge.invoke(prompt)
@@ -154,6 +181,7 @@ Report any inconsistencies you find."""
             "is_consistent": result.get("is_consistent", False),
             "inconsistencies": result.get("inconsistencies", []),
             "reasoning": result.get("reasoning", ""),
+            "specific_examples": result.get("specific_examples", []),
         }
     except Exception as e:
         return {
@@ -161,10 +189,11 @@ Report any inconsistencies you find."""
             "is_consistent": False,
             "inconsistencies": [f"Error checking consistency: {str(e)}"],
             "reasoning": f"Failed to check consistency: {str(e)}",
+            "specific_examples": [],
         }
 
 
-def generate_expected_trajectory(
+def generate_expected_tool_calls(
     topics: List[str],
     stats_count: int,
     expert_count: int,
@@ -172,58 +201,130 @@ def generate_expected_trajectory(
     year_count: int,
     compare_count: int,
 ) -> List[Dict[str, Any]]:
-    """Generate expected trajectory pattern based on task structure."""
+    """Generate expected tool calls pattern based on task structure."""
     expected = []
     for topic in topics:
-        expected.append({"name": "research_topic", "topic": topic})
+        expected.append({"name": "research_topic", "args": {"topic": topic}})
         for i in range(stats_count):
-            expected.append({"name": "get_statistics", "topic": topic, "index": i})
+            expected.append({"name": "get_statistics", "args": {"topic": topic}})
         for i in range(expert_count):
-            expected.append({"name": "get_expert_opinion", "topic": topic, "index": i})
+            expected.append({"name": "get_expert_opinion", "args": {"topic": topic}})
         for i in range(case_count):
-            expected.append({"name": "get_case_study", "topic": topic, "index": i})
+            expected.append({"name": "get_case_study", "args": {"topic": topic}})
         for i in range(year_count):
-            expected.append({"name": "get_year_data", "topic": topic, "index": i})
-        expected.append({"name": "calculate_compound_growth", "topic": topic})
-        expected.append({"name": "calculate_market_share", "topic": topic})
-        expected.append({"name": "analyze_correlation", "topic": topic})
-        expected.append({"name": "calculate_cost_benefit_analysis", "topic": topic})
-        expected.append({"name": "aggregate_statistics", "topic": topic})
+            expected.append({"name": "get_year_data", "args": {"topic": topic}})
+        expected.append({"name": "calculate_compound_growth", "args": {"topic": topic}})
+        expected.append({"name": "calculate_market_share", "args": {"topic": topic}})
+        expected.append({"name": "analyze_correlation", "args": {"topic": topic}})
+        expected.append({"name": "calculate_cost_benefit_analysis", "args": {"topic": topic}})
+        expected.append({"name": "aggregate_statistics", "args": {"topic": topic}})
         for i in range(compare_count):
-            expected.append({"name": "compare_topics", "topic": topic, "index": i})
-        expected.append({"name": "synthesize_research", "topic": topic})
+            expected.append({"name": "compare_topics", "args": {"topic": topic}})
+        expected.append({"name": "synthesize_research", "args": {"topics": topics}})
     return expected
 
 
-def compare_trajectory_order(
-    actual_trajectory: List[Dict[str, Any]],
-    expected_trajectory: List[Dict[str, Any]],
+def _normalize_tool_call(tc: Dict[str, Any]) -> Dict[str, Any]:
+    """Normalize a tool call for comparison (handle different argument formats)."""
+    normalized = {"name": tc.get("name", "")}
+    args = tc.get("args", {})
+    if isinstance(args, dict):
+        normalized["args"] = {k: v for k, v in args.items() if v is not None}
+    else:
+        normalized["args"] = {}
+    return normalized
+
+
+def _tool_call_matches(actual: Dict[str, Any], expected: Dict[str, Any]) -> bool:
+    """Check if actual tool call matches expected (name + arguments)."""
+    if actual.get("name") != expected.get("name"):
+        return False
+    
+    actual_args = actual.get("args", {})
+    expected_args = expected.get("args", {})
+    
+    # Check that all expected arguments are present and match exactly
+    for key, expected_value in expected_args.items():
+        if key not in actual_args:
+            return False
+        actual_value = actual_args[key]
+        
+        # Exact match required (tolerance = 0)
+        if isinstance(expected_value, (int, float)) and isinstance(actual_value, (int, float)):
+            if expected_value != actual_value:
+                return False
+        elif expected_value != actual_value:
+            return False
+    
+    return True
+
+
+def compare_tool_calls(
+    actual_tool_calls: List[Dict[str, Any]],
+    expected_tool_calls: List[Dict[str, Any]],
     strict_order: bool = False
 ) -> Dict[str, Any]:
-    """Compare actual trajectory with expected trajectory."""
-    if not expected_trajectory:
+    """
+    Compare actual tool calls with expected tool calls.
+    
+    Checks that expected tool calls with matching arguments are PRESENT in the actual tool calls,
+    regardless of order (unless strict_order=True).
+    
+    Args:
+        actual_tool_calls: List of actual tool calls with {"name": str, "args": dict}
+        expected_tool_calls: List of expected tool calls with {"name": str, "args": dict}
+        strict_order: If True, also check order. If False, only check presence.
+    
+    Returns:
+        Dict with score, matched_steps, unmatched_steps, total_expected, and unmatched_indices
+    """
+    if not expected_tool_calls:
         return {
             "score": 0.0,
             "matched_steps": 0,
-            "unmatched_steps": len(actual_trajectory),
+            "unmatched_steps": len(actual_tool_calls),
             "total_expected": 0,
+            "unmatched_indices": [],
         }
     
-    actual_tool_names = [tc.get("name", "") for tc in actual_trajectory]
-    expected_tool_names = [tc.get("name", "") for tc in expected_trajectory]
+    # Normalize both tool call lists
+    actual_normalized = [_normalize_tool_call(tc) for tc in actual_tool_calls]
+    expected_normalized = [_normalize_tool_call(tc) for tc in expected_tool_calls]
     
     if strict_order:
-        matches = sum(1 for a, e in zip(actual_tool_names, expected_tool_names) if a == e)
+        # Check order: match at each position
+        matches = 0
+        unmatched_indices = []
+        for idx, expected_tc in enumerate(expected_normalized):
+            if idx < len(actual_normalized):
+                if _tool_call_matches(actual_normalized[idx], expected_tc):
+                    matches += 1
+                else:
+                    unmatched_indices.append(idx)
+            else:
+                unmatched_indices.append(idx)
+        
         matched_steps = matches
-        unmatched_steps = len(expected_tool_names) - matches
+        unmatched_steps = len(expected_normalized) - matches
     else:
-        actual_counter = Counter(actual_tool_names)
-        expected_counter = Counter(expected_tool_names)
-        matched_counter = actual_counter & expected_counter
-        matched_steps = sum(matched_counter.values())
-        unmatched_steps = sum(expected_counter.values()) - matched_steps
+        # Check presence: find each expected tool call somewhere in actual tool calls
+        matched_indices = []
+        unmatched_indices = []
+        
+        for idx, expected_tc in enumerate(expected_normalized):
+            found = False
+            for actual_tc in actual_normalized:
+                if _tool_call_matches(actual_tc, expected_tc):
+                    matched_indices.append(idx)
+                    found = True
+                    break
+            if not found:
+                unmatched_indices.append(idx)
+        
+        matched_steps = len(matched_indices)
+        unmatched_steps = len(unmatched_indices)
     
-    total_expected = len(expected_tool_names)
+    total_expected = len(expected_normalized)
     score = matched_steps / total_expected if total_expected > 0 else 0.0
     
     return {
@@ -231,5 +332,6 @@ def compare_trajectory_order(
         "matched_steps": matched_steps,
         "unmatched_steps": unmatched_steps,
         "total_expected": total_expected,
+        "unmatched_indices": unmatched_indices,
     }
 
