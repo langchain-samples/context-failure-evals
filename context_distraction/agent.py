@@ -5,10 +5,15 @@ Creates standard and deep agents for context distraction evaluation.
 """
 
 from langchain.agents import create_agent
-from deepagents import create_deep_agent
+from langchain.agents.middleware import SummarizationMiddleware
+from langgraph.checkpoint.memory import MemorySaver
 
-from context_distraction.tools import all_research_tools
-from context_distraction.instructions import DETAILED_RESEARCH_INSTRUCTIONS
+from context_distraction.tools import all_research_tools, custom_agent_tools
+from context_distraction.instructions import (
+    STANDARD_RESEARCH_INSTRUCTIONS,
+    CUSTOM_AGENT_RESEARCH_INSTRUCTIONS,
+)
+from context_distraction.middleware import AnswerStorageMiddleware, CustomAgentState
 
 
 def create_standard_agent(llm, tools=None, system_prompt=None):
@@ -21,7 +26,7 @@ def create_standard_agent(llm, tools=None, system_prompt=None):
     if tools is None:
         tools = all_research_tools
     if system_prompt is None:
-        system_prompt = DETAILED_RESEARCH_INSTRUCTIONS
+        system_prompt = STANDARD_RESEARCH_INSTRUCTIONS
     
     return create_agent(
         model=llm,
@@ -30,20 +35,28 @@ def create_standard_agent(llm, tools=None, system_prompt=None):
     )
 
 
-def create_deep_agent_instance(llm, tools=None, system_prompt=None):
+def create_custom_agent(llm, tools=None, system_prompt=None, summarize_threshold: int = 20):
     """
-    Create a deep agent using create_deep_agent.
+    Create a custom agent with reflection capabilities, enhanced instructions, and summarization middleware.
     
-    This agent stores tool results in virtual filesystem to reduce context length,
-    mitigating context distraction for large tasks.
+    This agent:
+    - Uses reflection tool to plan approach
+    - Uses enhanced instructions for better planning and tool usage
+    - Has summarization middleware that compresses tool results while preserving statistics
+    - Does NOT use deep agents filesystem approach
     """
     if tools is None:
-        tools = all_research_tools
+        tools = custom_agent_tools
     if system_prompt is None:
-        system_prompt = DETAILED_RESEARCH_INSTRUCTIONS
+        system_prompt = CUSTOM_AGENT_RESEARCH_INSTRUCTIONS
     
-    return create_deep_agent(
+    # Create answer storage middleware that cleans up calculation history when answers are stored
+    answer_storage_middleware = AnswerStorageMiddleware()
+    
+    return create_agent(
         model=llm,
         tools=tools,
-        system_prompt=system_prompt
+        system_prompt=system_prompt,
+        middleware=[answer_storage_middleware],
+        state_schema=CustomAgentState,  # Ensures entire graph uses custom schema with all_tool_calls
     )

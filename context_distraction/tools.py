@@ -1236,5 +1236,83 @@ atomic_math_tools = [
     calculate_sum,
 ]
 
+@tool
+def reflect_on_approach(reflection: str) -> Dict[str, Any]:
+    """
+    Use this tool to document your approach, plan, or adjust your strategy when confused.
+    
+    This is a thinking/planning tool that helps you:
+    - Write down your initial approach at the beginning of the task
+    - Document your plan for answering questions
+    - Reflect when you're stuck or confused
+    - Adjust your strategy mid-task
+    
+    Args:
+        reflection: Your thoughts, approach, plan, or adjustments. Be specific about:
+                   - What questions you need to answer
+                   - Which tools you'll use and in what order
+                   - What calculations are needed
+                   - Any concerns or confusion you have
+                   - How you'll structure your approach
+    
+    Returns:
+        Confirmation that your reflection was recorded.
+    
+    Example usage:
+        reflect_on_approach("I need to answer 9 questions. I'll start by gathering statistics for all domains, then calculate correlations using data from all domains, then perform CBA calculations for each domain.")
+    """
+    return {
+        "ok": True,
+        "reflection_recorded": True,
+        "message": "Your reflection has been recorded. Use this to guide your approach.",
+        "reflection": reflection
+    }
+
+@tool
+def store_answer(question_number: str, answer: str, calculation_details: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Store the final answer to a question. Call this when you have completed answering a question.
+    
+    This tool stores your answer and triggers cleanup of intermediate calculation steps,
+    keeping only the essential answer in context for future questions.
+    
+    IMPORTANT: Call this tool after you have fully answered each question, one at a time.
+    This helps manage context by keeping only final answers instead of all calculation steps.
+    
+    Args:
+        question_number: The question number (e.g., "Q1", "Q2", "Q5")
+        answer: The final answer to the question (can be a number, text, or structured data)
+        calculation_details: REQUIRED - Include supporting data and rationale for debugging:
+            - Key input values used (e.g., "Initial value: 3372, Growth rate: 15%, Years: 10")
+            - Calculation method/formula applied (e.g., "Compound growth: PV * (1 + r)^n")
+            - Intermediate results if relevant (e.g., "Discount factor: 0.3855, NPV: 85.11")
+            - Data sources referenced (e.g., "Based on get_statistics('renewable_energy') results")
+            - Any assumptions or reasoning (e.g., "Used 10% discount rate as specified")
+            This helps humans understand and verify how you arrived at the answer.
+    
+    Returns:
+        Confirmation that the answer was stored and intermediate steps were cleaned up.
+    
+    Example usage:
+        store_answer(
+            "Q1", 
+            "13641.62", 
+            "Compound growth: Initial capacity 3372 GW, growth rate 15% per year, 10 years. "
+            "Formula: 3372 * (1.15)^10 = 13641.62. Data from get_statistics('renewable_energy')."
+        )
+    """
+    return {
+        "ok": True,
+        "answer_stored": True,
+        "question_number": question_number,
+        "answer": answer,
+        "message": f"Answer to {question_number} stored successfully. Intermediate calculation steps have been cleaned up from context.",
+        "calculation_details": calculation_details
+    }
+
+# Standard tools (without reflection)
 all_research_tools = core_research_tools + analysis_tools + calculation_tools + atomic_math_tools
+
+# Custom agent tools (includes reflection and answer storage)
+custom_agent_tools = all_research_tools + [reflect_on_approach, store_answer]
 

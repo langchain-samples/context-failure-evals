@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from context_distraction.agent import create_standard_agent
+from context_distraction.agent import create_standard_agent, create_custom_agent
 from context_distraction.resources.expected_calculations import (
     EXPECTED_COMPOUND_GROWTH,
     EXPECTED_CBA,
@@ -29,7 +29,7 @@ from context_distraction.resources.validation_utils import (
 
 client = Client()
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-standard_agent = create_standard_agent(llm)
+
 
 def build_reference_outputs(task: Dict[str, Any]) -> Dict[str, Any]:
     """Build reference outputs with all expected values."""
@@ -95,9 +95,11 @@ def create_or_get_dataset(dataset_name: str, tasks: List[Dict[str, Any]] = None)
     
     return dataset
 
-dataset_name = "context-distraction-research"
-# For testing: use only first task
-dataset = create_or_get_dataset(dataset_name, tasks=TEST_TASKS[:1])
+def setup_datasets(full_name: str, slim_name: str, tasks: List[Dict[str, Any]]):
+    full_dataset = create_or_get_dataset(full_name, tasks=tasks)
+    slim_dataset = create_or_get_dataset(slim_name, tasks=tasks[:1])
+
+    return full_dataset, slim_dataset
 
 # Evaluators using inputs, outputs, reference_outputs signature
 def recall_accuracy_evaluator(inputs: Dict[str, Any], outputs: Dict[str, Any], reference_outputs: Dict[str, Any]) -> Dict[str, Any]:
@@ -234,8 +236,8 @@ def extract_tool_calls_from_message(msg: Any) -> List[Dict[str, Any]]:
     
     return tool_calls
 
-def run_agent_with_tool_calls(agent, query: str) -> dict:
-    """Run agent and return structured output, printing progress."""
+def run_standard_agent(agent, query: str) -> dict:
+    """Run standard agent and extract tool calls from messages."""
     tool_calls_list = []
     final_response = ""
     
@@ -243,32 +245,85 @@ def run_agent_with_tool_calls(agent, query: str) -> dict:
         result = agent.invoke({"messages": [("user", query)]})
         messages = result.get("messages", [])
         
+        # Extract tool calls from messages
         for msg in messages:
             tool_calls = extract_tool_calls_from_message(msg)
             for tc in tool_calls:
                 tool_calls_list.append(tc)
             
-            # Get final response
+            # Get final response from last message with content
+            if isinstance(msg, dict) and msg.get("content"):
+                final_response = msg["content"]
+            elif hasattr(msg, 'content') and msg.content:
+                final_response = msg.content
+        return {"final_response": final_response, "tool_calls": tool_calls_list}
+    except Exception as e:
+        return {"final_response": f"ERROR: {e}", "tool_calls": tool_calls_list}
+
+
+def run_custom_agent_with_tool_calls(agent, query: str) -> dict:
+    """Run custom agent and extract tool calls from state, including filtered ones."""
+    tool_calls_list = []
+    final_response = ""
+    
+    try:
+        result = agent.invoke({"messages": [("user", query)]})
+        messages = result.get("messages", [])
+        
+        tool_calls_list = result["all_tool_calls"]
+        
+        # Always extract final response from messages
+        for msg in messages:
             if isinstance(msg, dict) and msg.get("content"):
                 final_response = msg["content"]
             elif hasattr(msg, 'content') and msg.content:
                 final_response = msg.content
         
-        print(f"  Extracted {len(tool_calls_list)} tool calls")
         return {"final_response": final_response, "tool_calls": tool_calls_list}
     except Exception as e:
-        print(f"  ERROR: {e}")
         return {"final_response": f"ERROR: {e}", "tool_calls": tool_calls_list}
 
-experiment = evaluate(
-    lambda inputs: run_agent_with_tool_calls(standard_agent, inputs["query"]),
-    data=dataset_name,
-    evaluators=[
-        recall_accuracy_evaluator,
-        tool_call_completeness_evaluator,
-        tool_call_efficiency_evaluator,
-    ],
-    experiment_prefix="context-distraction-standard-agent",
-    metadata={"agent_type": "standard", "model": "gpt-4o-mini"},
-    max_concurrency=1,
-)
+
+def run_experiment(agent_type: str, dataset_name: str):
+    """
+    Run evaluation experiment for specified agent type.
+    
+    Args:
+        agent_type: Either "standard", or "custom"
+        dataset_name: Name of the LangSmith dataset to evaluate against
+    
+    Returns:
+        The experiment result from LangSmith evaluate
+    """
+    if agent_type == "standard":
+        agent = create_standard_agent(llm)
+        run_fn = run_standard_agent
+    elif agent_type == "custom":
+        agent = create_custom_agent(llm)
+        run_fn = run_custom_agent_with_tool_calls
+    else:
+        raise ValueError(f"Unknown agent type: {agent_type}. Must be 'standard' or 'custom'")
+
+    return evaluate(
+        lambda inputs: run_fn(agent, inputs["query"]),
+        data=dataset_name,
+        evaluators=[
+            recall_accuracy_evaluator,
+            tool_call_completeness_evaluator,
+            tool_call_efficiency_evaluator,
+        ],
+        experiment_prefix=f"context-distraction-{agent_type}-agent",
+        metadata={"agent_type": agent_type, "model": "gpt-4o-mini"},
+        max_concurrency=1,
+    )
+
+full_dataset_name = "context-distraction-research"
+slim_dataset_name = "context-distraction-research-slim"
+setup_datasets(full_dataset_name, slim_dataset_name, TEST_TASKS)
+
+# Run experiments for both agent types
+# standard_experiment = run_experiment("standard", full_dataset_name)
+# standard_experiment = run_experiment("standard", slim_dataset_name)
+
+# custom_experiment = run_experiment("custom", full_dataset_name)
+custom_experiment = run_experiment("custom", slim_dataset_name)
