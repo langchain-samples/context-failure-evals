@@ -3,11 +3,10 @@
 from typing import Literal
 import asyncio
 from dotenv import load_dotenv
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage, get_buffer_string
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 from langgraph.graph.message import add_messages
-from langchain_core.messages import AIMessage
 from langgraph.types import Command
 from langchain_openai import ChatOpenAI
 from context_distraction.instructions import (
@@ -35,7 +34,7 @@ llm = ChatOpenAI(model="gpt-4o-mini")
 
 
 researcher_tools_list = all_research_tools + [store_deliverable, finish]
-researcher_llm = llm.bind_tools(researcher_tools_list, parallel_tool_calls=False)
+researcher_llm = llm.bind_tools(researcher_tools_list)
 
 async def researcher(state, config):
     """Individual researcher that delivers a key deliverable."""
@@ -58,6 +57,27 @@ def should_continue_research(state: ResearcherState) -> Literal["researcher_tool
         return "researcher_tools"
 
 
+def check_research_finished(state: ResearcherState) -> Literal["researcher", "__end__"]:
+    """Check if the last tool called was finish and route accordingly."""
+    researcher_messages = state.get("reseacher_messages", [])
+    if not researcher_messages:
+        return "researcher"
+    
+    # Find the last AIMessage with tool_calls (should be the one that just executed tools)
+    for i in range(len(researcher_messages) - 1, -1, -1):
+        msg = researcher_messages[i]
+        if hasattr(msg, 'tool_calls') and msg.tool_calls:
+            # Check if any tool call was finish
+            for tool_call in msg.tool_calls:
+                tool_name = tool_call.get('name') if isinstance(tool_call, dict) else getattr(tool_call, 'name', '')
+                if tool_name == 'finish':
+                    return "__end__"
+            # Found an AIMessage with tool_calls, but finish wasn't called
+            break
+    
+    return "researcher"
+
+
 # Researcher Subgraph (defined after functions so we can use them)
 researcher_builder = StateGraph(ResearcherState)
 researcher_builder.add_node("researcher", researcher)
@@ -68,7 +88,14 @@ researcher_builder.add_conditional_edges(
     should_continue_research,
     {"researcher_tools": "researcher_tools", "__end__": END}
 )
-researcher_builder.add_edge("researcher_tools", "researcher")  # Loop back to researcher after tools
+researcher_builder.add_conditional_edges(
+    "researcher_tools",
+    check_research_finished,
+    {
+        "researcher": "researcher",
+        "__end__": END
+    }
+)
 researcher_subgraph = researcher_builder.compile()
 
 
@@ -183,6 +210,7 @@ async def final_report_generation(state, config):
     deliverables_text = "\n".join([f"- {key}: {value}" for key, value in deliverables.items()])
     
     # Format conversation history as string
+    from langchain_core.messages import get_buffer_string
     conversation_history = get_buffer_string(supervisor_messages)
     
     # Create prompt for final report generation
@@ -205,10 +233,10 @@ The following conversation history contains all research findings, tool results,
     # Generate final report using LLM
     final_report = llm.invoke(report_prompt).content
     
+    # Add the final report as a supervisor message
     return {
-        "final_report": final_report,
         "supervisor_messages": [
-            AIMessage(content="Final report generated, and stored in state.")
+            AIMessage(content=final_report)
         ]
     }
 

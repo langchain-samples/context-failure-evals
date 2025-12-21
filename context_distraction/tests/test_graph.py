@@ -23,7 +23,7 @@ async def run_graph_agent(inputs: dict) -> dict:
     final_response = ""
     
     # Set recursion limit to prevent infinite loops
-    config = {"recursion_limit": 100}
+    config = {"recursion_limit": 200}
     
     # Stream to capture tool calls and final state
     final_state = {}
@@ -40,46 +40,40 @@ async def run_graph_agent(inputs: dict) -> dict:
         # chunk is a tuple: (namespace, data) or just data dict
         if isinstance(chunk, tuple) and len(chunk) >= 2:
             namespace, data = chunk
-            ns_str = ":".join(str(n) for n in namespace) if namespace else "root"
         elif isinstance(chunk, dict):
             data = chunk
-            ns_str = "root"
         else:
             continue
         
-        # Extract messages from various keys that might contain them
+        # Extract messages from nested node data structure
+        # Structure: data[node_name][message_key] = [messages]
         if isinstance(data, dict):
-            for key in ['tools', 'model', 'supervisor_messages', 'reseacher_messages']:
-                if key in data:
-                    if isinstance(data[key], dict) and 'messages' in data[key]:
-                        msgs = data[key]['messages']
-                    elif isinstance(data[key], list):
-                        msgs = data[key]
-                    else:
-                        continue
-                    
-                    all_messages.extend(msgs)
-                    
-                    # Extract tool calls from messages
-                    for msg in msgs:
-                        tool_calls = extract_tool_calls_from_message(msg)
-                        for tc in tool_calls:
-                            if tc not in trajectory:  # Avoid duplicates
-                                trajectory.append(tc)
+            for node_key, node_data in data.items():
+                if isinstance(node_data, dict):
+                    # Check for messages in common message keys
+                    for msg_key in ['supervisor_messages', 'reseacher_messages', 'messages']:
+                        if msg_key in node_data and isinstance(node_data[msg_key], list):
+                            msgs = node_data[msg_key]
+                            all_messages.extend(msgs)
+                            
+                            # Extract tool calls from messages
+                            for msg in msgs:
+                                tool_calls = extract_tool_calls_from_message(msg)
+                                for tc in tool_calls:
+                                    trajectory.append(tc)
             
             # Update final state
             final_state.update(data)
     
-    # Extract final response from final_report key or last message
-    final_response = final_state.get("final_report", "")
-    if not final_response:
-        for msg in reversed(all_messages):
-            if isinstance(msg, dict) and msg.get("content"):
-                final_response = msg["content"]
-                break
-            elif hasattr(msg, 'content') and msg.content:
-                final_response = msg.content
-                break
+    # Extract final response from last message
+    final_response = ""
+    for msg in reversed(all_messages):
+        if isinstance(msg, dict) and msg.get("content"):
+            final_response = msg["content"]
+            break
+        elif hasattr(msg, 'content') and msg.content:
+            final_response = msg.content
+            break
     
     return {"final_response": final_response, "trajectory": trajectory}
 

@@ -57,8 +57,7 @@ async def run_standard_agent(inputs: dict) -> dict:
                     for msg in msgs:
                         tool_calls = extract_tool_calls_from_message(msg)
                         for tc in tool_calls:
-                            if tc not in trajectory:  # Avoid duplicates
-                                trajectory.append(tc)
+                            trajectory.append(tc)
             
             # Update final state
             final_state.update(data)

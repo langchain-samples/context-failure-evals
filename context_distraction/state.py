@@ -21,6 +21,7 @@ class ResearcherState(TypedDict):
     research_question: str 
     reseacher_messages: Annotated[list[MessageLikeRepresentation], override_reducer]
     deliverables: Annotated[Dict[str, str], override_reducer] = {}
+    deliverable_key: Optional[str]  # The shorthand name of the deliverable this researcher should store
     finding: Optional[str]
 
 class SupervisorState(TypedDict):

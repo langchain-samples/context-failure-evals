@@ -234,13 +234,12 @@ def get_expert_opinion(topic: str, expert_id: Optional[str] = None) -> Dict[str,
 
 
 @tool
-def get_statistics(topic: str, metric: Optional[str] = None) -> Dict[str, Any]:
+def get_statistics(topic: str) -> Dict[str, Any]:
     """
     Get detailed statistics for a specific topic.
     
     Args:
         topic: The topic to get statistics for
-        metric: Optional specific metric name. If not provided, returns all available statistics.
     
     Returns:
         Comprehensive statistics including all metrics, trends, and contextual information.
@@ -256,16 +255,7 @@ def get_statistics(topic: str, metric: Optional[str] = None) -> Dict[str, Any]:
         
         topic_data = RESEARCH_TOPICS[topic_key]
         stats = topic_data["statistics"]
-        
-        if metric:
-            if metric not in stats:
-                return {
-                    "ok": False,
-                    "error": f"Metric '{metric}' not found. Available metrics: {', '.join(stats.keys())}"
-                }
-            selected_stats = {metric: stats[metric]}
-        else:
-            selected_stats = stats
+        selected_stats = stats
         
         # Generate verbose statistical analysis
         stat_descriptions = {
@@ -789,7 +779,7 @@ core_research_tools = [
     get_expert_opinion,
     get_statistics,
     get_case_study,
-    get_year_data,  # More atomic than get_historical_trends
+    get_year_data,  
 ]
 
 @tool
@@ -1355,7 +1345,8 @@ def create_deep_research_tool(researcher_subgraph):
     """
     @tool
     async def deep_research(
-        research_question: str, 
+        research_question: str,
+        deliverable_key: str,
         notes: Optional[str] = None,
         runtime: ToolRuntime = None  # ToolRuntime parameter is not visible to the model
     ) -> str:
@@ -1370,6 +1361,8 @@ def create_deep_research_tool(researcher_subgraph):
             research_question: The specific research question or deliverable to investigate.
                               Should be clear and specific (e.g., "What is the NPV of renewable energy 
                               investment with 10% discount rate over 10 years?")
+            deliverable_key: The shorthand name/key for this deliverable, from the state
+                            This is the key that should be used when calling store_deliverable.
             notes: Optional notes about the research task including helpful formulas and supplementary information.
         
         Returns:
@@ -1380,14 +1373,25 @@ def create_deep_research_tool(researcher_subgraph):
         # Invoke the researcher subgraph
         # Get config from runtime if available, otherwise use empty config
         config = runtime.config if runtime else {}
-        # Set recursion limit for researcher subgraph
-        config["recursion_limit"] = 50
+        # Set recursion limit for researcher subgraph (increased to allow for research + store + finish)
+        config["recursion_limit"] = 100
+        
+        # Include deliverable_key in the message so the researcher knows which key to use
+        message_content = f"""=== YOUR ASSIGNED DELIVERABLE KEY ===
+**DELIVERABLE_KEY: "{deliverable_key}"**
+You MUST use this exact key "{deliverable_key}" when calling store_deliverable with your final answer.
+=====================================
+
+Research Question: {research_question}
+
+Supplementary Notes: {notes or 'None provided'}"""
         
         result = await researcher_subgraph.ainvoke({
             "reseacher_messages": [
-                HumanMessage(content=f"{research_question}\n\nSupplementary Notes: {notes or 'None provided'}")
+                HumanMessage(content=message_content)
             ],
-            "research_question": research_question
+            "research_question": research_question,
+            "deliverable_key": deliverable_key
         }, config)
         
         # Extract findings from finish tool result or use finding from state

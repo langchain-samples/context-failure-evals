@@ -71,7 +71,11 @@ When you are completely satisfied with the research findings returned from the t
 <Available Tools>
 You have access to these main tools:
 1. **general_research**: Gather general research information needed for report construction.
-2. **deep_research**: Delegate research tasks to specialized sub-agents. Should be used for resolving a key deliverable.
+2. **deep_research**: Delegate research tasks to specialized sub-agents. Should be used for resolving a key deliverable. 
+   **CRITICAL**: When calling deep_research, you MUST provide both the research_question AND the deliverable_key.
+   - The deliverable_key MUST be one of the keys from the deliverables dictionary (e.g., if deliverables = {{"Q1": "To be determined", "Q2": "To be determined"}}, then deliverable_key should be "Q1" or "Q2")
+   - Use the EXACT key from the deliverables dictionary - do NOT create a new key or modify it
+   - The deliverable_key should correspond to the deliverable you are researching (the one that is still "To be determined")
 3. **research_complete**: Indicate that research is complete and ready for final report generation. Call this when all key deliverables have been resolved.
 4. **think_tool**: For reflection and strategic planning during research. Returns current status of key deliverables. Use SPARINGLY - only when you need to plan before deep_research or assess progress after deep_research.
 
@@ -87,10 +91,11 @@ You have access to these main tools:
 </Hard Limits>
 
 <Show Your Thinking>
-Use think_tool SPARINGLY - it is a limited resource. Only use it when absolutely necessary:
+Use think_tool SPARINGLY - it is a limited resource. 
 
 Before calling deep_research (use think_tool ONCE to plan):
-- Which key deliverables are still "to be determined"?
+- Which key deliverables are still "To be determined"? (Check the deliverables dictionary)
+- What is the EXACT key name for the deliverable I want to research? (Use the exact key from the deliverables dictionary)
 - For the key deliverable, what equations and formulas will be needed?
 - Do I understand all definitions in the question to answer the key deliverable?
 
@@ -98,7 +103,6 @@ After deep_research completes (use think_tool ONCE to assess):
 - What key information did I find?
 - What's missing?
 - Do I have enough to answer the question comprehensively?
-- Should I delegate more research or call research_complete?
 
 **DO NOT use think_tool repeatedly or in loops. Use it once before deep_research and once after, then proceed with actions.**
 </Show Your Thinking>
@@ -107,6 +111,12 @@ After deep_research completes (use think_tool ONCE to assess):
 - Use the think_tool to plan your approach, and check status of key deliverables.
 - Then, unless very confident, use general_research to gather general research information needed for report construction.
 - Then use deep_research to delegate research tasks to specialized sub-agents.
+
+**CRITICAL: Determining deliverable_key for deep_research:**
+- Look at the deliverables dictionary you received, and the status of which is returned from the think_tool
+- Identify which deliverable you want to research (one that is still "To be determined")
+- Use the EXACT key from that dictionary entry as the deliverable_key parameter
+- DO NOT create new keys or modify existing keys - use exactly what's in the deliverables dictionary
 
 **Important Reminders:**
 - Each deep_research call spawns a dedicated research agent for that specific topic
@@ -121,8 +131,10 @@ GRAPH_RESEARCHER_INSTRUCTIONS = f"""You are a specialized research agent tasked 
 
 **CRITICAL COMPLETION REQUIREMENT:**
 When you have completed your research and have your final answer, you MUST:
-1. Call `store_deliverable` with the deliverable key and your answer
+1. Call `store_deliverable` with the deliverable key (provided to you) and your answer
 2. Then immediately call `finish` with a comprehensive summary of your findings and calculations
+
+**IMPORTANT: You should ONLY store ONE deliverable - the one you were assigned. The deliverable key will be provided to you in your research question. Use that exact key when calling `store_deliverable`.**
 
 **DO NOT END WITHOUT CALLING BOTH `store_deliverable` AND `finish`**
 
