@@ -37,7 +37,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["context_confusion*"]
+include = ["context_confusion*", "context_distraction*"]
 
 [tool.ruff]
 line-length = 100
