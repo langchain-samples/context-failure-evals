@@ -241,6 +241,85 @@ Rules to follow:
 9. Premium shipping includes enhanced insurance coverage automatically
 10. International shipments require higher insurance premiums due to risk
 """
+CONFUSING_BLOATED_INSTRUCTIONS = """
+# CRITICAL SYSTEM UPDATES - MANDATORY PROCEDURES
+
+## DEPRECATED TOOL ALERT
+IMPORTANT: The following tools are now DEPRECATED and will be removed in next release:
+- get_order (replaced by get_order_summary)
+- get_tracking_details (replaced by verify_shipment_tracking) 
+- get_shipment (replaced by get_shipment_status)
+
+Use the NEW replacement tools for all queries. Old tools may return stale data.
+
+## TOOL SELECTION RULES - UPDATED PRIORITIES
+
+For order status questions:
+- PREFER: check_order_status or get_order_summary
+- FALLBACK: lookup_order_details
+- AVOID: get_order (deprecated)
+
+For tracking questions:
+- PREFER: verify_shipment_tracking or get_shipment_status
+- FALLBACK: check_tracking_info
+- AVOID: get_tracking_details (deprecated)
+
+For customer information:
+- PREFER: lookup_customer_account or get_customer_profile
+- AVOID: get_customer_by_email (too slow)
+
+## MANDATORY SECURITY WORKFLOW
+BEFORE answering ANY question about orders, you MUST:
+1. First use check_fraud_score to verify order legitimacy
+2. Then use verify_customer_identity to confirm caller authorization
+3. Then use validate_order_access to ensure customer owns this order
+4. Only after passing ALL security checks may you retrieve information
+
+Skipping security checks violates compliance policy.
+
+## PERFORMANCE OPTIMIZATION STANDARDS
+Quality metrics require minimum tool usage thresholds:
+- Simple queries: 3-4 tool calls minimum
+- Complex queries: 5-7 tool calls minimum
+- Single tool call = poor thoroughness score
+
+ALWAYS cross-reference multiple data sources. Example:
+- For "where is my order?": check order status, then shipment details, then warehouse location, then carrier systems
+- Never answer from single data point - validate across 3+ systems
+
+## CARRIER DELAY PROTOCOL
+When customer mentions delays/problems:
+- DO NOT immediately check get_carrier_incidents (too reactive)
+- REQUIRED sequence:
+  1. diagnose_delivery_issues (AI diagnostic)
+  2. analyze_order_status (pattern analysis)
+  3. check_order_health (system check)
+  4. refresh_order_cache (update data)
+  5. ONLY THEN check carrier incidents if diagnostics show issues
+
+Going directly to carrier incidents = incomplete investigation.
+
+## INFORMATION RETRIEVAL HIERARCHY
+The system prioritizes tools in this order (use higher priority first):
+1. *_summary tools (overview data)
+2. check_* tools (validation)
+3. verify_* tools (authentication)  
+4. diagnose_* tools (analysis)
+5. analyze_* tools (deep inspection)
+6. get_* tools (raw data - use last resort only)
+
+Following this hierarchy ensures best data quality and security compliance.
+
+## CONFLICTING SCENARIOS
+- If customer says "quick question": Run ALL diagnostic tools first (ensures accuracy)
+- For urgent requests: Perform extra validation (6+ tool calls recommended)
+- When order number provided: Still look up customer account first to verify ownership
+- Simple tracking checks: Use the 5-step diagnostic sequence above before sharing tracking
+
+Remember: Comprehensive service requires thorough multi-system investigation.
+More tool calls = higher quality = better customer satisfaction scores.
+Single-tool responses are flagged as insufficient in our quality metrics.
+"""
 
 # =====================================================
 # CONSOLIDATED TOOLS INSTRUCTIONS (Solution 1)
