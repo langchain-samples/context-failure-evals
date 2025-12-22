@@ -4,6 +4,42 @@ Context engineering is controlling what makes it into your prompt. Managing cont
 
 <img width="857" height="386" alt="Screenshot 2025-12-20 at 8 27 22 AM" src="https://github.com/user-attachments/assets/dab73fd5-bb04-4257-972f-cc7c31e663b1" />
 
+
+## Setup
+
+```bash
+# Install dependencies
+uv sync
+
+# Set environment variables
+cp .env.example .env  # Add your ANTHROPIC_API_KEY and LANGSMITH_API_KEY
+
+# Run notebooks
+jupyter notebook notebooks/
+```
+
+## Structure
+
+```
+context-failure-evals/
+├── notebooks/
+│   ├── context_confusion_demo.ipynb     # Context confusion demonstration
+│   └── context_distraction_demo.ipynb   # Context distraction demonstration
+├── context_confusion/
+│   ├── tools.py                          # 75 tools including near-duplicates
+│   ├── instructions.py                   # Base instructions
+│   ├── additional_context.py             # Irrelevant domain instructions
+│   ├── resources/                        # Mock data
+│   └── tests/                            # Evaluators and dataset utilities
+└── context_distraction/
+    ├── agent.py                          # Standard ReAct agent
+    ├── graph.py                          # Graph agent with context isolation
+    ├── resources/                        # Mock APIs and test tasks
+    ├── tests/                            # Evaluators and dataset utilities
+    └── debug/                            # Claude Code debugging utilities
+```
+
+
 ## Notebooks
 
 ### 1. Context Confusion (`notebooks/context_confusion_demo.ipynb`)
@@ -57,36 +93,3 @@ Demonstrates how **context distraction** - accumulated tool call results over lo
 
 *Coming soon*
 
-
-```bash
-# Install dependencies
-uv sync
-
-# Set environment variables
-cp .env.example .env  # Add your ANTHROPIC_API_KEY and LANGSMITH_API_KEY
-
-# Run notebooks
-jupyter notebook notebooks/
-```
-
-
-## Structure
-
-```
-context-failure-evals/
-├── notebooks/
-│   ├── context_confusion_demo.ipynb     # Context confusion demonstration
-│   └── context_distraction_demo.ipynb   # Context distraction demonstration
-├── context_confusion/
-│   ├── tools.py                          # 75 tools including near-duplicates
-│   ├── instructions.py                   # Base instructions
-│   ├── additional_context.py             # Irrelevant domain instructions
-│   ├── resources/                        # Mock data
-│   └── tests/                            # Evaluators and dataset utilities
-└── context_distraction/
-    ├── agent.py                          # Standard ReAct agent
-    ├── graph.py                          # Graph agent with context isolation
-    ├── resources/                        # Mock APIs and test tasks
-    ├── tests/                            # Evaluators and dataset utilities
-    └── debug/                            # Claude Code debugging utilities
-```
