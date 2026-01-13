@@ -91,7 +91,3 @@ Demonstrates how **context distraction** - accumulated tool call results over lo
 
 *Coming soon*
 
-### 5. Context Isolation
-
-*Coming soon*
-
