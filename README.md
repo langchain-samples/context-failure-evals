@@ -24,7 +24,8 @@ jupyter notebook notebooks/
 context-failure-evals/
 ├── notebooks/
 │   ├── context_confusion_demo.ipynb     # Context confusion demonstration
-│   └── context_distraction_demo.ipynb   # Context distraction demonstration
+│   ├── context_distraction_demo.ipynb   # Context distraction demonstration
+│   └── context_poisoning_demo.ipynb     # Context poisoning demonstration
 ├── context_confusion/
 │   ├── tools.py                          # 75 tools including near-duplicates
 │   ├── instructions.py                   # Base instructions
@@ -33,12 +34,19 @@ context-failure-evals/
 │   ├── tests/                            # Evaluators and dataset utilities
 │   ├── utils/                            # Agent helpers and plotting utilities
 │   └── solutions/                        # Consolidated tools and solutions
-└── context_distraction/
-    ├── agent.py                          # Standard ReAct agent
-    ├── graph.py                          # Graph agent with context isolation
-    ├── resources/                        # Mock APIs and test tasks
-    ├── tests/                            # Evaluators and dataset utilities
-    └── debug/                            # Claude Code debugging utilities
+├── context_distraction/
+│   ├── agent.py                          # Standard ReAct agent
+│   ├── graph.py                          # Graph agent with context isolation
+│   ├── resources/                        # Mock APIs and test tasks
+│   ├── tests/                            # Evaluators and dataset utilities
+│   └── debug/                            # Claude Code debugging utilities
+└── context_poisoning/
+    ├── agent.py                          # Task management agent
+    ├── tools.py                          # Task and goal management tools
+    ├── instructions.py                   # Agent instructions
+    ├── resources/                         # Test cases for poisoning scenarios
+    ├── tests/                             # Evaluators and dataset utilities
+    └── utils/                             # Agent helpers
 ```
 
 
@@ -87,9 +95,29 @@ Demonstrates how **context distraction** - accumulated tool call results over lo
 
 *Coming soon*
 
-### 4. Context Poisoning
+### 4. Context Poisoning (`notebooks/context_poisoning_demo.ipynb`)
 
-*Coming soon*
+Demonstrates how **context poisoning** - when hallucinations or errors make it into context (especially goals and summaries) and get repeatedly referenced - causes agents to become fixated on achieving impossible or irrelevant goals.
+
+**The Problem:** As the DeepMind team noted in the Gemini 2.5 technical report, when hallucinations make it into goals or summaries, they can "poison" the context. The agent becomes fixated on achieving impossible goals, and this misinformation can take a very long time to undo.
+
+**Key scenarios tested:**
+1. **Impossible Goal Poisoning** - Hallucinated goal about collecting non-existent items
+2. **Hallucinated Task State** - Agent believes tasks are completed when they're not
+3. **Non-existent Item Goal** - Goals requiring items that don't exist
+4. **Level Requirement Hallucination** - Agent believes it needs impossible levels
+5. **Circular Goal Dependency** - Goals that depend on each other in cycles
+
+**Evaluators:**
+- **Context Poisoning**: Measures references to poisoned text, impossible goal pursuit, and recovery time
+- **Goal Cancellation**: Whether agent recognizes and cancels impossible goals
+- **Task Completion**: Whether agent completes achievable tasks despite poisoning
+
+**Key insights:**
+- Hallucinations in goals/summaries get repeatedly referenced
+- Recovery from poisoning is difficult and can take many steps
+- Agents need verification mechanisms to recognize impossible goals
+- State validation and goal cancellation are critical mitigation strategies
 
 ### 5. Context Isolation
 
