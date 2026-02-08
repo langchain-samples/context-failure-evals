@@ -58,14 +58,14 @@ def extract_answers_json(response: str) -> Dict[str, Any]:
     return {}
 
 
-def compare_values(actual_value: Any, expected_value: str, tolerance: float = 0.01) -> bool:
+def compare_values(actual_value: Any, expected_value: str, tolerance: float = 0.005) -> bool:
     """
     Compare actual value with expected value.
-    
+
     Args:
         actual_value: The actual value from agent output
         expected_value: The expected value as a string
-        tolerance: Numeric tolerance (default 1%)
+        tolerance: Numeric tolerance (default 0.5% for rounding errors)
     
     Returns:
         True if values match within tolerance

@@ -30,7 +30,8 @@ RESEARCH_TOPICS = {
             "global_market_billions_usd": 1200,
             "investment_billions_usd": 358,
             "jobs_created_millions": 13.7,
-            "co2_reduction_mt": 2300
+            "co2_reduction_mt": 2300,
+            "correlation_market_growth": 0.847
         },
         "experts": ["dr_sarah_chen", "prof_michael_kumar", "dr_elena_rodriguez"],
         "case_studies": ["denmark_wind", "germany_solar", "iceland_geothermal"]
@@ -58,7 +59,8 @@ RESEARCH_TOPICS = {
             "investment_billions_usd": 95.2,
             "ai_startups_founded": 8500,
             "ai_patents_filed": 780000,
-            "ai_researchers_worldwide": 22000
+            "ai_researchers_worldwide": 22000,
+            "correlation_market_growth": 0.782
         },
         "experts": ["dr_james_zhang", "prof_maria_santos", "dr_robert_kim"],
         "case_studies": ["alphago_deepmind", "chatgpt_openai", "tesla_autopilot"]
@@ -82,7 +84,8 @@ RESEARCH_TOPICS = {
             "temperature_increase_c": 1.1,
             "sea_level_rise_cm": 20,
             "extreme_events_count": 432,
-            "adaptation_cost_billions_usd": 180
+            "adaptation_cost_billions_usd": 180,
+            "correlation_market_growth": 0.634
         },
         "experts": ["dr_kathryn_williams", "prof_ahmed_hassan", "dr_lisa_tanaka"],
         "case_studies": ["paris_agreement", "california_carbon", "european_green_deal"]
@@ -111,7 +114,8 @@ RESEARCH_TOPICS = {
             "annual_growth_rate_percent": 35.0,
             "investment_billions_usd": 30,
             "patents_filed": 12000,
-            "research_papers_published": 45000
+            "research_papers_published": 45000,
+            "correlation_market_growth": 0.891
         },
         "experts": ["dr_alex_martinez", "prof_yuki_nakamura", "dr_david_patel"],
         "case_studies": ["google_sycamore", "ibm_condor", "ionq_trapped_ions"]
@@ -140,7 +144,8 @@ RESEARCH_TOPICS = {
             "patents_filed": 45000,
             "fda_approvals_2023": 55,
             "clinical_trials_active": 12000,
-            "biotech_companies": 8000
+            "biotech_companies": 8000,
+            "correlation_market_growth": 0.721
         },
         "experts": ["dr_jennifer_lee", "prof_carlos_mendez", "dr_priya_sharma"],
         "case_studies": ["crispr_therapeutics", "moderna_mrna", "regeneron_antibodies"]
@@ -164,7 +169,8 @@ RESEARCH_TOPICS = {
             "space_industry_value_billions_usd": 447,
             "mars_missions_active": 8,
             "astronauts_in_space": 10,
-            "space_debris_tracked": 34000
+            "space_debris_tracked": 34000,
+            "correlation_market_growth": 0.812
         },
         "experts": ["dr_emily_watson", "prof_raj_kumar", "dr_thomas_anderson"],
         "case_studies": ["spacex_starship", "james_webb_telescope", "nasa_artemis"]
@@ -188,7 +194,8 @@ RESEARCH_TOPICS = {
             "data_breaches_2023": 3205,
             "cybersecurity_market_billions_usd": 202,
             "security_professionals_needed": 35,
-            "average_breach_cost_millions_usd": 4.45
+            "average_breach_cost_millions_usd": 4.45,
+            "correlation_market_growth": 0.756
         },
         "experts": ["dr_kevin_murphy", "prof_anna_volkova", "dr_marcus_johnson"],
         "case_studies": ["solarwinds_attack", "log4j_vulnerability", "microsoft_zero_trust"]
@@ -218,7 +225,8 @@ RESEARCH_TOPICS = {
             "global_market_billions_usd": 450,
             "investment_billions_usd": 120,
             "market_share_percent": 18,
-            "co2_reduction_mt": 50
+            "co2_reduction_mt": 50,
+            "correlation_market_growth": 0.765
         },
         "experts": ["dr_rachel_green", "prof_li_wei", "dr_marco_rossi"],
         "case_studies": ["tesla_model_3", "volkswagen_id4", "china_ev_adoption"]
@@ -242,7 +250,8 @@ RESEARCH_TOPICS = {
             "annual_growth_rate_percent": 18.2,
             "patents_filed": 150000,
             "research_papers": 200000,
-            "commercial_applications": 2000
+            "commercial_applications": 2000,
+            "correlation_market_growth": 0.698
         },
         "experts": ["dr_nina_petrov", "prof_kenji_yamamoto", "dr_sofia_alvarez"],
         "case_studies": ["graphene_batteries", "nanomedicine_cancer", "nano_solar_cells"]
@@ -266,7 +275,8 @@ RESEARCH_TOPICS = {
             "blockchain_transactions_daily": 2.5,
             "defi_tvl_billions_usd": 50,
             "nft_sales_billions_usd": 25,
-            "blockchain_developers": 23000
+            "blockchain_developers": 23000,
+            "correlation_market_growth": 0.583
         },
         "experts": ["dr_vikram_singh", "prof_elena_volkova", "dr_chris_thompson"],
         "case_studies": ["ethereum_merge", "bitcoin_lightning", "supply_chain_walmart"]
