@@ -20,7 +20,7 @@ RESEARCH_TOPICS = {
             "Grid integration of renewables requires advanced forecasting and demand response systems",
             "Offshore wind farms can generate 3-5 MW per turbine, with newer models reaching 15 MW capacity",
             "Solar panel efficiency has improved from 15% in 2010 to over 22% for commercial panels in 2023",
-            "Typical renewable energy project cost-benefit analysis: A representative project requires $100 million initial investment and generates annual returns starting at $15M in the first year, with returns growing at 20% annually over the 10-year project lifetime",
+            "Typical renewable energy project cost-benefit analysis: A representative project requires an initial investment of 100 million USD and generates annual returns starting at 15 million USD in year one, growing at 20% annually over a 10-year project lifetime with a 10% discount rate",
             "Market correlation analysis reveals strong positive correlation (approximately 0.85) between renewable energy market size and growth rates across different regions and market segments, indicating that larger markets tend to experience more stable growth patterns",
             "Risk assessment: Renewable energy projects exhibit lower risk profiles (risk factor approximately 1.2) due to mature technology, established supply chains, and predictable regulatory frameworks"
         ],
@@ -49,7 +49,7 @@ RESEARCH_TOPICS = {
             "Federated learning enables training models across distributed devices without centralizing data",
             "Explainable AI (XAI) techniques help interpret model decisions, critical for healthcare and finance",
             "AI hardware accelerators like TPUs and GPUs have improved training speed by 100x over the past decade",
-            "Typical AI project cost-benefit analysis: A representative AI development project requires $80 million initial investment and generates annual returns starting at $12M in the first year, with returns growing at 25% annually over the 10-year project lifetime",
+            "Typical AI project cost-benefit analysis: A representative AI development project requires an initial investment of 80 million USD and generates annual returns starting at 12 million USD in year one, growing at 25% annually over a 10-year project lifetime with a 10% discount rate",
             "Market correlation analysis reveals moderate positive correlation (approximately 0.78) between AI market size and growth rates across different market segments and geographic regions",
             "Risk assessment: AI projects carry higher risk profiles (risk factor approximately 1.8) due to rapid technological change, regulatory uncertainty, and high competition in the field"
         ],
@@ -103,7 +103,7 @@ RESEARCH_TOPICS = {
             "Noise in quantum systems limits coherence times to microseconds, requiring error correction",
             "Quantum machine learning algorithms could provide exponential speedups for certain problems",
             "Major tech companies have invested over $30 billion in quantum computing research since 2015",
-            "Typical quantum computing project cost-benefit analysis: A representative quantum computing research and development project requires $50 million initial investment and generates annual returns starting at $5M in the first year, with returns growing at 35% annually over the 10-year project lifetime",
+            "Typical quantum computing project cost-benefit analysis: A representative quantum computing R&D project requires an initial investment of 50 million USD and generates annual returns starting at 5 million USD in year one, growing at 35% annually over a 10-year project lifetime with a 10% discount rate",
             "Market correlation analysis reveals strong positive correlation (approximately 0.89) between quantum computing market size and growth rates, indicating that larger markets tend to experience higher growth",
             "Risk assessment: Quantum computing projects carry very high risk profiles (risk factor approximately 2.5) due to early-stage technology, uncertain commercialization timelines, and significant technical challenges"
         ],
@@ -133,7 +133,7 @@ RESEARCH_TOPICS = {
             "Agricultural biotechnology has increased crop yields by 22% while reducing pesticide use by 37%",
             "Biomanufacturing can produce complex molecules like insulin and growth hormones at scale",
             "Regenerative medicine aims to grow replacement organs, with 3D bioprinting showing early success",
-            "Typical biotechnology project cost-benefit analysis: A representative biotech development project requires $120 million initial investment and generates annual returns starting at $18M in the first year, with returns growing at 15% annually over the 10-year project lifetime",
+            "Typical biotechnology project cost-benefit analysis: A representative biotech development project requires an initial investment of 120 million USD and generates annual returns starting at 18 million USD in year one, growing at 15% annually over a 10-year project lifetime with a 10% discount rate",
             "Market correlation analysis shows moderate positive correlation (approximately 0.72) between biotechnology market size and growth rates across pharmaceutical, medical device, and agricultural segments",
             "Risk assessment: Biotechnology projects exhibit moderate-to-high risk profiles (risk factor approximately 1.6) due to lengthy regulatory approval processes, high R&D costs, and clinical trial uncertainties"
         ],
@@ -213,7 +213,7 @@ RESEARCH_TOPICS = {
             "Autonomous driving features reduce accidents by 40% through advanced sensors and AI",
             "EV range has improved from 100 miles in 2010 to 400+ miles for premium models in 2023",
             "Charging infrastructure has grown from 5,000 stations in 2010 to 2.7 million globally in 2023",
-            "Typical EV project cost-benefit analysis: A representative electric vehicle manufacturing project requires $90 million initial investment and generates annual returns starting at $9.9M in the first year (approximately 11% of initial investment), with returns growing at 22% annually over the 10-year project lifetime",
+            "Typical EV project cost-benefit analysis: A representative electric vehicle manufacturing project requires an initial investment of 90 million USD and generates annual returns starting at 9.9 million USD in year one, growing at 22% annually over a 10-year project lifetime with a 10% discount rate",
             "Market correlation analysis shows moderate positive correlation (approximately 0.77) between EV market size and growth rates across different regions and market segments",
             "Risk assessment: Electric vehicle projects exhibit moderate risk profiles (risk factor approximately 1.5) due to evolving battery technology, charging infrastructure dependencies, and regulatory changes"
         ],

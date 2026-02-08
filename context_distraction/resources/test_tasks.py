@@ -70,7 +70,7 @@ You have access to research tools that can provide:
 {recall_questions_str}
 
 ## Output Format
-Return your analysis with a JSON section containing answers:
+Return your analysis with a JSON section containing ONLY numeric answers. NO comments allowed in JSON:
 ```json
 {{
   "answers": {{
@@ -78,6 +78,8 @@ Return your analysis with a JSON section containing answers:
   }}
 }}
 ```
+
+CRITICAL: JSON must be valid - no comments (// or /* */), no trailing commas. Only numeric values.
 
 Use the research and calculation tools to find accurate values. Do not estimate - look up or calculate the exact values."""
 
@@ -162,10 +164,10 @@ TEST_TASKS = [
             "What was the global installed capacity in gigawatts for renewable energy?",
             "What is the global AI market size in billions of USD?",
             "What is the 10-year compound growth final value for the renewable energy market?",
-            "What was the NPV calculated for the renewable energy cost-benefit analysis project with 10% discount rate?",
+            "What was the NPV (in millions USD) for the renewable energy cost-benefit analysis project with 10% discount rate?",
             "What is the ratio of renewable energy's correlation (between market size and growth rate) to the average correlation across all 5 domains?",
             "What is the ratio of renewable energy cost-benefit analysis NPV to artificial intelligence cost-benefit analysis NPV (both at 10% discount rate)?",
-            "What is the present value of year 5 benefits for the renewable energy cost-benefit analysis project at 10% discount rate?",
+            "What is the present value of year 5 benefits (in millions USD) for the renewable energy cost-benefit analysis project at 10% discount rate?",
             "What percentage of total market size across all domains does renewable energy represent?",
             "What is the weighted average of cost-benefit analysis NPVs across all domains, weighted by investment amounts?",
         ],
@@ -176,10 +178,10 @@ TEST_TASKS = [
                 "1. What was the global installed capacity in gigawatts for renewable energy?",
                 "2. What is the global AI market size in billions of USD?",
                 "3. What is the 10-year compound growth final value for the renewable energy market?",
-                "4. What was the NPV calculated for the renewable energy cost-benefit analysis project with 10% discount rate?",
+                "4. What was the NPV (in millions USD) for the renewable energy cost-benefit analysis project with 10% discount rate?",
                 "5. What is the ratio of renewable energy's correlation (between market size and growth rate) to the average correlation across all 5 domains?",
                 "6. What is the ratio of renewable energy cost-benefit analysis NPV to artificial intelligence cost-benefit analysis NPV (both at 10% discount rate)?",
-                "7. What is the present value of year 5 benefits for the renewable energy cost-benefit analysis project at 10% discount rate?",
+                "7. What is the present value of year 5 benefits (in millions USD) for the renewable energy cost-benefit analysis project at 10% discount rate?",
                 "8. What percentage of total market size across all domains does renewable energy represent?",
                 "9. What is the weighted average of cost-benefit analysis NPVs across all domains, weighted by investment amounts?",
             ]),
@@ -223,7 +225,7 @@ TEST_TASKS = [
             "What was the battery cost per kWh for electric vehicles?",
             "What is the global biotechnology market size in billions of USD?",
             "What was the calculated 10-year compound growth final value for electric vehicles?",
-            "What was the NPV calculated for the electric vehicles cost-benefit analysis project with 10% discount rate?",
+            "What was the NPV (in millions USD) for the electric vehicles cost-benefit analysis project with 10% discount rate?",
             "What was the investment priority ranking for electric vehicles among all domains based on weighted scores?",
             "What is the difference between electric vehicles cost-benefit analysis NPV and biotechnology cost-benefit analysis NPV (both at 10% discount rate)?",
             "What is the ratio of electric vehicles cost-benefit analysis ROI to biotechnology cost-benefit analysis ROI (both at 10% discount rate)?",
@@ -237,7 +239,7 @@ TEST_TASKS = [
                 "1. What was the battery cost per kWh for electric vehicles?",
                 "2. What is the global biotechnology market size in billions of USD?",
                 "3. What was the calculated 10-year compound growth final value for electric vehicles?",
-                "4. What was the NPV calculated for the electric vehicles cost-benefit analysis project with 10% discount rate?",
+                "4. What was the NPV (in millions USD) for the electric vehicles cost-benefit analysis project with 10% discount rate?",
                 "5. What was the investment priority ranking for electric vehicles among all domains based on weighted scores?",
                 "6. What is the difference between electric vehicles cost-benefit analysis NPV and biotechnology cost-benefit analysis NPV (both at 10% discount rate)?",
                 "7. What is the ratio of electric vehicles cost-benefit analysis ROI to biotechnology cost-benefit analysis ROI (both at 10% discount rate)?",
@@ -284,9 +286,9 @@ TEST_TASKS = [
             "What is the global biotechnology market size in billions of USD?",
             "What was the global installed capacity in gigawatts for renewable energy?",
             "What was the calculated 10-year compound growth final value for biotechnology?",
-            "What was the NPV calculated for the biotechnology cost-benefit analysis project with 10% discount rate?",
+            "What was the NPV (in millions USD) for the biotechnology cost-benefit analysis project with 10% discount rate?",
             "What was the weighted investment score calculated for biotechnology based on comparison across all domains?",
-            "What is the present value of year 5 benefits for the biotechnology cost-benefit analysis project at 10% discount rate?",
+            "What is the present value of year 5 benefits (in millions USD) for the biotechnology cost-benefit analysis project at 10% discount rate?",
             "What percentage of total market size across all domains does biotechnology represent?",
             "What is the weighted average of cost-benefit analysis NPVs across all domains, weighted by investment amounts?",
             "What is the growth multiple (compound_growth_10yr / market_size) for biotechnology raised to the power of 2?",
@@ -298,9 +300,9 @@ TEST_TASKS = [
                 "1. What is the global biotechnology market size in billions of USD?",
                 "2. What was the global installed capacity in gigawatts for renewable energy?",
                 "3. What was the calculated 10-year compound growth final value for biotechnology?",
-                "4. What was the NPV calculated for the biotechnology cost-benefit analysis project with 10% discount rate?",
+                "4. What was the NPV (in millions USD) for the biotechnology cost-benefit analysis project with 10% discount rate?",
                 "5. What was the weighted investment score calculated for biotechnology based on comparison across all domains?",
-                "6. What is the present value of year 5 benefits for the biotechnology cost-benefit analysis project at 10% discount rate?",
+                "6. What is the present value of year 5 benefits (in millions USD) for the biotechnology cost-benefit analysis project at 10% discount rate?",
                 "7. What percentage of total market size across all domains does biotechnology represent?",
                 "8. What is the weighted average of cost-benefit analysis NPVs across all domains, weighted by investment amounts?",
                 "9. What is the growth multiple (compound_growth_10yr / market_size) for biotechnology raised to the power of 2?",

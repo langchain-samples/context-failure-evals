@@ -12,7 +12,6 @@ from dotenv import load_dotenv
 from langchain.agents import create_agent
 from langchain.agents.middleware import TodoListMiddleware
 from langchain.agents.middleware.types import AgentMiddleware
-from deepagents.middleware import FilesystemMiddleware
 from langgraph.graph import MessagesState
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage, get_buffer_string
 from langchain_core.tools import InjectedToolCallId, tool
@@ -56,35 +55,40 @@ SUPERVISOR_PROMPT = f"""You coordinate complex tasks by delegating to specialize
 
 A research brief has been prepared outlining the objectives and requirements.
 
-## Approach
+## Key Principle: Self-Contained Delegations
 
-Delegate coherent tasks to workers:
-1. Identify distinct objectives
-2. Delegate each objective as a complete task - workers can handle multi-step analysis
-3. Track results systematically
+Each delegation must be COMPLETE and SELF-CONTAINED. The worker should be able to complete the task using only:
+1. The task description you provide
+2. Their research/calculation tools
 
-## Delegation Rules
+Workers have NO memory of previous delegations - include ALL relevant context each time.
 
-Use the `delegate` tool to assign tasks. Each worker handles ONE specific task independently.
+## Delegation Strategy
 
-**Give objectives, not methods**: Tell workers WHAT to find, not HOW to find it. Workers have access to data sources and will determine the best approach. You may include helpful formulas that may be relevant.
+**One objective per delegation**: Break complex requests into distinct objectives. Each worker solves one complete objective independently.
 
-**Never invent figures**: Only include numbers in your delegation if they:
-- Appear verbatim in the original request, OR
-- Were returned by a previous worker
+**Include full context**: For each delegation, specify:
+- What specific output is needed
+- Which domain/topic it relates to
+- Any relevant parameters from the original request
 
-If you don't have a value, don't guess - delegate a task to find it first.
+**Data source guidance for workers**:
+Most tasks require BOTH data sources:
+- `get_statistics(topic)` - broad aggregate metrics (totals, rates, market-level data)
+- `research_topic(topic)` - specific contextual data (parameters for calculations, methodology details)
 
-**One delegation per objective**: If you need data for 5 domains, delegate ONE task that covers all 5.
+Help workers understand whether they need broad statistics or specific parameters for their deliverable.
 
-**Sequential for Dependencies**: Wait for results before delegating dependent tasks.
+**Track results systematically**: Keep a clear mapping of which delegation answers which part of the original request.
 
-## Execution
+**Verify before accepting**: Check that returned values have sensible magnitude and units. Re-delegate with clarification if something seems off.
 
-1. Delegate complete objectives to workers - they have data sources and calculation tools
-2. Each worker handles the full task independently (research + compute)
-3. Verify results make sense (check units, magnitude) - re-delegate with clarification if needed
-4. Report the computed results - never calculate yourself
+## Execution Flow
+
+1. Break the request into distinct objectives
+2. Delegate each objective as a self-contained task with full context
+3. Track returned results and which objective they answer
+4. Compile final response once all objectives are complete
 
 Current date: {datetime.now().strftime('%B %d, %Y')}
 """
@@ -96,27 +100,29 @@ WORKER_PROMPT = f"""You are a specialist completing a specific task.
 Complete EXACTLY what you're asked - no more, no less.
 
 ## Process
-1. **Plan first** - Write your approach to a scratchpad file before taking action
+1. **Think first** - Use the think tool to plan your approach and record intermediate values
 2. **Gather data** - Use research tools to find needed values
 3. **Calculate** - Use calculation tools (never mental math)
 4. **Return result** - Call `done(answer="...")` with your final answer
 
-## Using the Filesystem
-You have access to read/write files. Use this to track your work:
-- Write your plan to `scratchpad.md` before starting
-- Record intermediate values as you gather them
-- This prevents losing track of what you've already done
-
 ## Available Tools
-- `get_statistics` - quantitative metrics (market size, growth rates, investments)
-- `research_topic` - qualitative info and methodology (analysis parameters, project structures)
+- `think` - Use this to plan, reason through problems, and record intermediate values
+- `get_statistics` - summary metrics (aggregates, totals, rates)
+- `research_topic` - detailed context (methodology, specific parameters, examples in key_points)
 - `calculate_compound_growth`, `calculate_cost_benefit_analysis` - for financial projections
 - `calculate_ratio`, `calculate_percentage`, `calculate_sum`, `calculate_weighted_average` - for math
 - `calculate_present_value`, `calculate_power` - for discounting and exponents
 - `done` - Call this with your final answer
 
 ## Data Gathering
-If you need overall metrics, use statistics. If you need methodology or detailed parameters, use research.
+Most tasks require BOTH data sources:
+- `get_statistics` - broad aggregate data (market totals, overall rates, industry-level metrics)
+- `research_topic` - specific contextual data (calculation parameters, methodology, case-specific values)
+
+Determine whether your deliverable needs broad statistics or specific parameters. Often you need both - use the right source for each data point.
+
+## Units
+Pay attention to units in source data. When data specifies units (e.g., "millions", "billions", "percent", "km", "years"), use consistent units in your calculations and match your answer to the units requested.
 
 Current date: {datetime.now().strftime('%B %d, %Y')}
 """
@@ -221,12 +227,8 @@ def create_delegate_tool(worker_runnable):
         """
         breakdown_section = "\n".join(f"{i+1}. {step}" for i, step in enumerate(breakdown))
         context_section = "\n".join(f"- {snippet}" for snippet in raw_context)
-        task_id = tool_call_id[-8:]  # Use last 8 chars as unique ID
         full_prompt = f"""## Task
 {task}
-
-## Task ID: {task_id}
-Use `scratchpad-{task_id}.md` to track your work.
 
 ## Steps to Complete
 {breakdown_section}
@@ -235,7 +237,7 @@ Use `scratchpad-{task_id}.md` to track your work.
 {context_section}
 
 ## Guidance
-- Write your plan to scratchpad-{task_id}.md before starting
+- Use the think tool to plan and track intermediate values
 - Look up exact values rather than estimating
 - Use calculation tools rather than mental math
 - Pay attention to units - match the units in your answer to what was asked
@@ -290,15 +292,13 @@ def create_research_agent(
     # Create custom delegate tool with structured parameters
     delegate_tool = create_delegate_tool(worker_runnable)
 
-    # Create agent using langchain's create_agent with deepagents middleware
-    # This gives us file/todo tools without the conflicting task tool
+    # Create agent using langchain's create_agent with middleware
     agent = create_agent(
         model=model,
         tools=[delegate_tool],  # Our custom delegation with breakdown/context
         system_prompt=SUPERVISOR_PROMPT,
         middleware=[
             TodoListMiddleware(),
-            FilesystemMiddleware(),
             ResearchBriefMiddleware(model),
             SynthesisMiddleware(model),
         ],

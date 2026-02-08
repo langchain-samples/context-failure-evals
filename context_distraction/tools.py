@@ -169,7 +169,13 @@ def _research_topic_impl(topic: str, depth: str = "comprehensive") -> Dict[str, 
 
 @tool
 def research_topic(topic: str, depth: str = "comprehensive") -> Dict[str, Any]:
-    """Get qualitative research insights and context for a topic (key findings, analysis, examples)."""
+    """
+    Get qualitative research insights for a topic (key findings, methodology, analysis context).
+
+    Args:
+        topic: Topic name (e.g., 'renewable_energy', 'artificial_intelligence')
+        depth: Level of detail ('brief' or 'comprehensive')
+    """
     return _research_topic_impl(topic, depth)
 
 
@@ -224,13 +230,10 @@ def get_expert_opinion(topic: str, expert_id: Optional[str] = None) -> Dict[str,
 @tool
 def get_statistics(topic: str) -> Dict[str, Any]:
     """
-    Get quantitative market data and metrics for a topic (market size, growth rates, investments, etc).
+    Get quantitative metrics for a topic (market size, growth rates, investments, correlations).
 
     Args:
-        topic: The topic to get statistics for
-
-    Returns:
-        Market-level statistics and numeric metrics.
+        topic: Topic name (e.g., 'renewable_energy', 'artificial_intelligence')
     """
     topic_key = topic.lower().replace(" ", "_")
 
@@ -619,16 +622,16 @@ def calculate_compound_growth(initial_value: float, growth_rate: float, years: i
     Calculate compound growth over multiple years.
 
     Args:
-        initial_value: Starting value (year 1)
+        initial_value: Starting value (year 0)
         growth_rate: Annual growth rate as decimal (e.g., 0.15 for 15%)
-        years: Number of years
+        years: Number of years to project
 
     Returns:
-        List of values for each year. Year 1 = initial_value, Year 2 = initial_value * (1 + rate), etc.
+        List of values for years 0 through N. Final element is the value after N years of growth.
     """
     try:
         yearly_values = []
-        for year in range(years):
+        for year in range(years + 1):  # Include final year
             value = initial_value * ((1 + growth_rate) ** year)
             yearly_values.append(round(value, 2))
         return yearly_values
@@ -1015,6 +1018,25 @@ atomic_math_tools = [
 # COMPLETION TOOL
 # ------------------------------------------------------------
 @tool
+def think(thought: str) -> str:
+    """
+    Use this tool to think through a problem, plan your approach, or record intermediate values.
+
+    This is a scratchpad for your reasoning process. Use it to:
+    - Plan your approach before gathering data
+    - Record values you've found so you don't lose track
+    - Work through calculations step by step
+
+    Args:
+        thought: Your reasoning, plan, or notes
+
+    Returns:
+        Your thought echoed back (for reference in conversation)
+    """
+    return f"Recorded: {thought}"
+
+
+@tool
 def done(
     answer: str,
     tool_call_id: Annotated[str, InjectedToolCallId],
@@ -1061,5 +1083,5 @@ all_research_tools = [
     calculate_sum,
 ]
 
-# Deepagent tools include `done` for subagent termination
-deepagent_research_tools = all_research_tools + [done]
+# Deepagent tools include `think` for scratchpad and `done` for subagent termination
+deepagent_research_tools = all_research_tools + [think, done]

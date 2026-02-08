@@ -42,15 +42,15 @@ async def run_experiment(dataset_name: str):
     )
 
 
-async def run_local_test(case_index=0, questions=None):
+async def run_local_test(task_index=0, questions=None):
     """
     Run a local test with streaming output for debugging.
 
     Args:
-        case_index: Index of test case to run (0-2 for tasks 1-3)
+        task_index: Index of test task to run (0-2 for tasks 1-3)
         questions: Optional list of question numbers to include (e.g., [5, 7, 8])
     """
-    task = TEST_TASKS[case_index]
+    task = TEST_TASKS[task_index]
 
     # Build partial task if specific questions requested
     if questions:
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Test deep agent")
     parser.add_argument("--langsmith", action="store_true", help="Run evaluation on LangSmith")
     parser.add_argument("--dataset", default="context-distraction-research-slim", help="LangSmith dataset name")
-    parser.add_argument("--case", type=int, default=1, help="Test case number (1-3) for local testing")
+    parser.add_argument("--task", type=int, default=1, help="Test task number (1-3) for local testing")
     parser.add_argument("--questions", "-q", type=str, default=None,
                         help="Specific questions to test, e.g. '5,7,8' or '5-8' or '5'. Default: all questions")
 
@@ -129,10 +129,10 @@ if __name__ == "__main__":
         print(f"\nDeep agent experiment completed: {experiment}")
     else:
         # Run local test
-        case_index = args.case - 1  # Convert 1-based to 0-based index
-        if case_index < 0 or case_index >= len(TEST_TASKS):
-            print(f"Error: Case {args.case} out of range. Valid cases: 1-{len(TEST_TASKS)}")
+        task_index = args.task - 1  # Convert 1-based to 0-based index
+        if task_index < 0 or task_index >= len(TEST_TASKS):
+            print(f"Error: Task {args.task} out of range. Valid tasks: 1-{len(TEST_TASKS)}")
             exit(1)
 
         questions = parse_questions(args.questions) if args.questions else None
-        asyncio.run(run_local_test(case_index, questions))
+        asyncio.run(run_local_test(task_index, questions))
