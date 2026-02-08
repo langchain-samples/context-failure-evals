@@ -81,7 +81,7 @@ Help workers understand whether they need broad statistics or specific parameter
 
 **Track results systematically**: Keep a clear mapping of which delegation answers which part of the original request.
 
-**Verify before accepting**: Check that returned values have sensible magnitude and units. Re-delegate with clarification if something seems off.
+**Verify before accepting**: Check that returned values have sensible magnitude and units. Re-delegate with clarification if something seems off. HOWEVER, If a delegation fails after 2 retries, skip it and move on or try a different approach rather than getting stuck.
 
 ## Execution Flow
 
