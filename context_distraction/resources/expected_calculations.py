@@ -238,6 +238,12 @@ def get_correlation_market_size_vs_growth(primary: str) -> float:
     """Get correlation coefficient between market size and growth rate."""
     return EXPECTED_CORRELATIONS[primary]["market_size_vs_growth_rate"]
 
+def calculate_correlation_ratio_to_avg(primary: str, topics: list) -> float:
+    """Calculate ratio of primary domain's correlation to average correlation across all topics."""
+    primary_corr = EXPECTED_CORRELATIONS[primary]["market_size_vs_growth_rate"]
+    avg_corr = sum(EXPECTED_CORRELATIONS[d]["market_size_vs_growth_rate"] for d in topics) / len(topics)
+    return round(primary_corr / avg_corr, 4)
+
 def get_investment_priority_rank(primary: str) -> int:
     """Get investment priority ranking."""
     return EXPECTED_INVESTMENT_RANKING_DICT.get(primary)

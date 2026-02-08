@@ -20,7 +20,7 @@ RESEARCH_TOPICS = {
             "Grid integration of renewables requires advanced forecasting and demand response systems",
             "Offshore wind farms can generate 3-5 MW per turbine, with newer models reaching 15 MW capacity",
             "Solar panel efficiency has improved from 15% in 2010 to over 22% for commercial panels in 2023",
-            "Typical renewable energy project cost-benefit analysis: A representative project requires $100 million initial investment and generates annual returns starting at $15M in the first year, with returns growing at 20% annually over the 10-year project lifetime",
+            "Typical renewable energy project cost-benefit analysis: A representative project requires an initial investment of 100 million USD and generates annual returns starting at 15 million USD in year one, growing at 20% annually over a 10-year project lifetime with a 10% discount rate",
             "Market correlation analysis reveals strong positive correlation (approximately 0.85) between renewable energy market size and growth rates across different regions and market segments, indicating that larger markets tend to experience more stable growth patterns",
             "Risk assessment: Renewable energy projects exhibit lower risk profiles (risk factor approximately 1.2) due to mature technology, established supply chains, and predictable regulatory frameworks"
         ],
@@ -30,7 +30,8 @@ RESEARCH_TOPICS = {
             "global_market_billions_usd": 1200,
             "investment_billions_usd": 358,
             "jobs_created_millions": 13.7,
-            "co2_reduction_mt": 2300
+            "co2_reduction_mt": 2300,
+            "correlation_market_growth": 0.847
         },
         "experts": ["dr_sarah_chen", "prof_michael_kumar", "dr_elena_rodriguez"],
         "case_studies": ["denmark_wind", "germany_solar", "iceland_geothermal"]
@@ -48,7 +49,7 @@ RESEARCH_TOPICS = {
             "Federated learning enables training models across distributed devices without centralizing data",
             "Explainable AI (XAI) techniques help interpret model decisions, critical for healthcare and finance",
             "AI hardware accelerators like TPUs and GPUs have improved training speed by 100x over the past decade",
-            "Typical AI project cost-benefit analysis: A representative AI development project requires $80 million initial investment and generates annual returns starting at $12M in the first year, with returns growing at 25% annually over the 10-year project lifetime",
+            "Typical AI project cost-benefit analysis: A representative AI development project requires an initial investment of 80 million USD and generates annual returns starting at 12 million USD in year one, growing at 25% annually over a 10-year project lifetime with a 10% discount rate",
             "Market correlation analysis reveals moderate positive correlation (approximately 0.78) between AI market size and growth rates across different market segments and geographic regions",
             "Risk assessment: AI projects carry higher risk profiles (risk factor approximately 1.8) due to rapid technological change, regulatory uncertainty, and high competition in the field"
         ],
@@ -58,7 +59,8 @@ RESEARCH_TOPICS = {
             "investment_billions_usd": 95.2,
             "ai_startups_founded": 8500,
             "ai_patents_filed": 780000,
-            "ai_researchers_worldwide": 22000
+            "ai_researchers_worldwide": 22000,
+            "correlation_market_growth": 0.782
         },
         "experts": ["dr_james_zhang", "prof_maria_santos", "dr_robert_kim"],
         "case_studies": ["alphago_deepmind", "chatgpt_openai", "tesla_autopilot"]
@@ -82,7 +84,8 @@ RESEARCH_TOPICS = {
             "temperature_increase_c": 1.1,
             "sea_level_rise_cm": 20,
             "extreme_events_count": 432,
-            "adaptation_cost_billions_usd": 180
+            "adaptation_cost_billions_usd": 180,
+            "correlation_market_growth": 0.634
         },
         "experts": ["dr_kathryn_williams", "prof_ahmed_hassan", "dr_lisa_tanaka"],
         "case_studies": ["paris_agreement", "california_carbon", "european_green_deal"]
@@ -100,7 +103,7 @@ RESEARCH_TOPICS = {
             "Noise in quantum systems limits coherence times to microseconds, requiring error correction",
             "Quantum machine learning algorithms could provide exponential speedups for certain problems",
             "Major tech companies have invested over $30 billion in quantum computing research since 2015",
-            "Typical quantum computing project cost-benefit analysis: A representative quantum computing research and development project requires $50 million initial investment and generates annual returns starting at $5M in the first year, with returns growing at 35% annually over the 10-year project lifetime",
+            "Typical quantum computing project cost-benefit analysis: A representative quantum computing R&D project requires an initial investment of 50 million USD and generates annual returns starting at 5 million USD in year one, growing at 35% annually over a 10-year project lifetime with a 10% discount rate",
             "Market correlation analysis reveals strong positive correlation (approximately 0.89) between quantum computing market size and growth rates, indicating that larger markets tend to experience higher growth",
             "Risk assessment: Quantum computing projects carry very high risk profiles (risk factor approximately 2.5) due to early-stage technology, uncertain commercialization timelines, and significant technical challenges"
         ],
@@ -111,7 +114,8 @@ RESEARCH_TOPICS = {
             "annual_growth_rate_percent": 35.0,
             "investment_billions_usd": 30,
             "patents_filed": 12000,
-            "research_papers_published": 45000
+            "research_papers_published": 45000,
+            "correlation_market_growth": 0.891
         },
         "experts": ["dr_alex_martinez", "prof_yuki_nakamura", "dr_david_patel"],
         "case_studies": ["google_sycamore", "ibm_condor", "ionq_trapped_ions"]
@@ -129,7 +133,7 @@ RESEARCH_TOPICS = {
             "Agricultural biotechnology has increased crop yields by 22% while reducing pesticide use by 37%",
             "Biomanufacturing can produce complex molecules like insulin and growth hormones at scale",
             "Regenerative medicine aims to grow replacement organs, with 3D bioprinting showing early success",
-            "Typical biotechnology project cost-benefit analysis: A representative biotech development project requires $120 million initial investment and generates annual returns starting at $18M in the first year, with returns growing at 15% annually over the 10-year project lifetime",
+            "Typical biotechnology project cost-benefit analysis: A representative biotech development project requires an initial investment of 120 million USD and generates annual returns starting at 18 million USD in year one, growing at 15% annually over a 10-year project lifetime with a 10% discount rate",
             "Market correlation analysis shows moderate positive correlation (approximately 0.72) between biotechnology market size and growth rates across pharmaceutical, medical device, and agricultural segments",
             "Risk assessment: Biotechnology projects exhibit moderate-to-high risk profiles (risk factor approximately 1.6) due to lengthy regulatory approval processes, high R&D costs, and clinical trial uncertainties"
         ],
@@ -140,7 +144,8 @@ RESEARCH_TOPICS = {
             "patents_filed": 45000,
             "fda_approvals_2023": 55,
             "clinical_trials_active": 12000,
-            "biotech_companies": 8000
+            "biotech_companies": 8000,
+            "correlation_market_growth": 0.721
         },
         "experts": ["dr_jennifer_lee", "prof_carlos_mendez", "dr_priya_sharma"],
         "case_studies": ["crispr_therapeutics", "moderna_mrna", "regeneron_antibodies"]
@@ -164,7 +169,8 @@ RESEARCH_TOPICS = {
             "space_industry_value_billions_usd": 447,
             "mars_missions_active": 8,
             "astronauts_in_space": 10,
-            "space_debris_tracked": 34000
+            "space_debris_tracked": 34000,
+            "correlation_market_growth": 0.812
         },
         "experts": ["dr_emily_watson", "prof_raj_kumar", "dr_thomas_anderson"],
         "case_studies": ["spacex_starship", "james_webb_telescope", "nasa_artemis"]
@@ -188,7 +194,8 @@ RESEARCH_TOPICS = {
             "data_breaches_2023": 3205,
             "cybersecurity_market_billions_usd": 202,
             "security_professionals_needed": 35,
-            "average_breach_cost_millions_usd": 4.45
+            "average_breach_cost_millions_usd": 4.45,
+            "correlation_market_growth": 0.756
         },
         "experts": ["dr_kevin_murphy", "prof_anna_volkova", "dr_marcus_johnson"],
         "case_studies": ["solarwinds_attack", "log4j_vulnerability", "microsoft_zero_trust"]
@@ -206,7 +213,7 @@ RESEARCH_TOPICS = {
             "Autonomous driving features reduce accidents by 40% through advanced sensors and AI",
             "EV range has improved from 100 miles in 2010 to 400+ miles for premium models in 2023",
             "Charging infrastructure has grown from 5,000 stations in 2010 to 2.7 million globally in 2023",
-            "Typical EV project cost-benefit analysis: A representative electric vehicle manufacturing project requires $90 million initial investment and generates annual returns starting at $9.9M in the first year (approximately 11% of initial investment), with returns growing at 22% annually over the 10-year project lifetime",
+            "Typical EV project cost-benefit analysis: A representative electric vehicle manufacturing project requires an initial investment of 90 million USD and generates annual returns starting at 9.9 million USD in year one, growing at 22% annually over a 10-year project lifetime with a 10% discount rate",
             "Market correlation analysis shows moderate positive correlation (approximately 0.77) between EV market size and growth rates across different regions and market segments",
             "Risk assessment: Electric vehicle projects exhibit moderate risk profiles (risk factor approximately 1.5) due to evolving battery technology, charging infrastructure dependencies, and regulatory changes"
         ],
@@ -218,7 +225,8 @@ RESEARCH_TOPICS = {
             "global_market_billions_usd": 450,
             "investment_billions_usd": 120,
             "market_share_percent": 18,
-            "co2_reduction_mt": 50
+            "co2_reduction_mt": 50,
+            "correlation_market_growth": 0.765
         },
         "experts": ["dr_rachel_green", "prof_li_wei", "dr_marco_rossi"],
         "case_studies": ["tesla_model_3", "volkswagen_id4", "china_ev_adoption"]
@@ -242,7 +250,8 @@ RESEARCH_TOPICS = {
             "annual_growth_rate_percent": 18.2,
             "patents_filed": 150000,
             "research_papers": 200000,
-            "commercial_applications": 2000
+            "commercial_applications": 2000,
+            "correlation_market_growth": 0.698
         },
         "experts": ["dr_nina_petrov", "prof_kenji_yamamoto", "dr_sofia_alvarez"],
         "case_studies": ["graphene_batteries", "nanomedicine_cancer", "nano_solar_cells"]
@@ -266,7 +275,8 @@ RESEARCH_TOPICS = {
             "blockchain_transactions_daily": 2.5,
             "defi_tvl_billions_usd": 50,
             "nft_sales_billions_usd": 25,
-            "blockchain_developers": 23000
+            "blockchain_developers": 23000,
+            "correlation_market_growth": 0.583
         },
         "experts": ["dr_vikram_singh", "prof_elena_volkova", "dr_chris_thompson"],
         "case_studies": ["ethereum_merge", "bitcoin_lightning", "supply_chain_walmart"]
