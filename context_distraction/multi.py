@@ -309,15 +309,15 @@ def create_research_agent(
 
 
 # Default agent instance
-deep_agent = create_research_agent()
+multi_agent = create_research_agent()
 
 
 # =============================================================================
 # RUNNER
 # =============================================================================
 
-async def run_deep_agent(query: str) -> Dict[str, Any]:
-    """Run the agent on a query and extract outputs."""
+async def run_multi_agent(query: str) -> Dict[str, Any]:
+    """Run the multi-agent on a query and extract outputs."""
     from context_distraction.resources.validation_utils import extract_tool_calls_from_message
 
     try:
@@ -325,7 +325,7 @@ async def run_deep_agent(query: str) -> Dict[str, Any]:
         final_response = ""
         all_messages = []
 
-        async for chunk in deep_agent.astream(
+        async for chunk in multi_agent.astream(
             {"messages": [HumanMessage(content=query)]},
             stream_mode="updates",
         ):

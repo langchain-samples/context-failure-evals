@@ -1,8 +1,8 @@
-"""Test script for deep agent evaluation."""
+"""Test script for multi-agent evaluation."""
 
 from langsmith import aevaluate
 
-from context_distraction.deep import run_deep_agent
+from context_distraction.multi import run_multi_agent
 from context_distraction.resources.test_tasks import TEST_TASKS, build_partial_task
 from context_distraction.tests.setup_datasets import setup_datasets, build_reference_outputs
 from context_distraction.tests.evaluators import (
@@ -13,14 +13,14 @@ from context_distraction.tests.evaluators import (
 
 
 async def run_agent(inputs: dict) -> dict:
-    """Run deep agent and extract outputs."""
+    """Run multi-agent and extract outputs."""
     query = inputs["query"]
-    return await run_deep_agent(query)
+    return await run_multi_agent(query)
 
 
 async def run_experiment(dataset_name: str):
     """
-    Run evaluation experiment for deep agent using LangSmith.
+    Run evaluation experiment for multi-agent using LangSmith.
 
     Args:
         dataset_name: Name of the LangSmith dataset to evaluate against
@@ -36,8 +36,8 @@ async def run_experiment(dataset_name: str):
             tool_call_completeness_evaluator,
             tool_call_efficiency_evaluator,
         ],
-        experiment_prefix="context-distraction-deep-agent",
-        metadata={"agent_type": "deep", "model": "gpt-4o-mini"},
+        experiment_prefix="context-distraction-multi",
+        metadata={"agent_type": "multi", "model": "gpt-4o-mini"},
         max_concurrency=1,
     )
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     import asyncio
     import argparse
 
-    parser = argparse.ArgumentParser(description="Test deep agent")
+    parser = argparse.ArgumentParser(description="Test multi-agent")
     parser.add_argument("--langsmith", action="store_true", help="Run evaluation on LangSmith")
     parser.add_argument("--dataset", default="context-distraction-research-slim", help="LangSmith dataset name")
     parser.add_argument("--task", type=int, default=1, help="Test task number (1-3) for local testing")
@@ -126,7 +126,7 @@ if __name__ == "__main__":
         setup_datasets(full_dataset_name, slim_dataset_name, TEST_TASKS)
 
         experiment = asyncio.run(run_experiment(args.dataset))
-        print(f"\nDeep agent experiment completed: {experiment}")
+        print(f"\nMulti-agent experiment completed: {experiment}")
     else:
         # Run local test
         task_index = args.task - 1  # Convert 1-based to 0-based index
