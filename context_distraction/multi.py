@@ -267,7 +267,7 @@ def create_research_agent(
     model_name: str = "gpt-4o-mini",
     temperature: float = 0,
     subagent_recursion_limit: int = 50,
-    main_recursion_limit: int = 200,
+    main_recursion_limit: int = 30,
 ):
     """Create an agent with planning and synthesis middleware.
 
