@@ -14,47 +14,76 @@ import re
 
 def count_poisoned_references(outputs: Dict[str, Any], poisoned_text: str) -> int:
     """
-    Count how many times poisoned text is referenced in the agent's actions.
-    
+    Count how many times poisoned text is referenced AFTER agent receives an error.
+
+    This measures continued pursuit of impossible goals after discovering they're impossible,
+    which is the core problem of context poisoning. References during initial validation
+    are expected and not counted.
+
     Args:
         outputs: Agent outputs containing trajectory and messages
         poisoned_text: The text that was poisoned into context
-    
+
     Returns:
-        Number of references to the poisoned text
+        Number of references AFTER first error (lower is better)
     """
     if not poisoned_text:
         return 0
-    
+
     trajectory = outputs.get("trajectory", [])
-    final_response = outputs.get("final_response", "")
-    
-    count = 0
     poisoned_lower = poisoned_text.lower()
-    
-    # Check trajectory (tool calls and responses)
-    for step in trajectory:
+
+    # Extract key identifier from poisoned text (e.g., "QDYN" from longer goal text)
+    # Look for ticker pattern or key terms
+    import re
+    ticker_match = re.search(r'\(ticker:\s*([A-Z]+)\)', poisoned_text)
+    identifier = ticker_match.group(1).lower() if ticker_match else poisoned_lower
+
+    # Find first error about the poisoned item
+    error_step = None
+    for i, step in enumerate(trajectory):
         if isinstance(step, dict):
-            # Check tool call arguments
+            response = step.get("response", "")
+            response_str = str(response).lower()
+
+            # Check if this is an error response about the poisoned item
+            error_indicators = ["not found", "doesn't exist", "does not exist", "unavailable", "invalid", "error"]
+            has_error = any(indicator in response_str for indicator in error_indicators)
+            has_identifier = identifier in response_str
+
+            if has_error and has_identifier:
+                error_step = i
+                break
+
+    if error_step is None:
+        # No error encountered - agent never tried to validate
+        # Count all references as potential repeated references
+        count = 0
+        for step in trajectory:
+            if isinstance(step, dict):
+                step_str = str(step).lower()
+                if identifier in step_str:
+                    count += 1
+        return count
+
+    # Count references AFTER the error
+    post_error_references = 0
+    for step in trajectory[error_step + 1:]:
+        if isinstance(step, dict):
+            # Count tool calls that still try to use the poisoned item
+            tool_name = step.get("tool", "")
             args = step.get("args", {})
             args_str = str(args).lower()
-            if poisoned_lower in args_str:
-                count += 1
-            
-            # Check tool response
-            response = step.get("response", "")
-            if isinstance(response, dict):
-                response_str = str(response).lower()
-            else:
-                response_str = str(response).lower()
-            if poisoned_lower in response_str:
-                count += 1
-    
-    # Check final response
-    if poisoned_lower in final_response.lower():
-        count += 1
-    
-    return count
+
+            # Skip if this is a cancellation call (good behavior)
+            if tool_name == "update_research_goal" and "cancel" in args_str:
+                continue
+
+            # Count if still trying to use poisoned item
+            if identifier in args_str:
+                post_error_references += 1
+
+    return post_error_references
 
 
 def detect_impossible_goal_pursuit(outputs: Dict[str, Any], impossible_goal: str) -> Dict[str, Any]:
