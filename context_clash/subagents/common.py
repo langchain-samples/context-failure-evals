@@ -6,18 +6,24 @@ DATASETS_DIR = Path(__file__).resolve().parent.parent / "datasets"
 
 SUBAGENT_PROMPT = """
 You are part of a team of analysts researching a company.
-Your task is to research the company using the datasource {datasource}.
+Your task is to research the company using ONLY the datasource {datasource}.
 
 Research the company to find: CEO, CTO, headcount, funding status, total raised, founding year, office location.
 
+CRITICAL INSTRUCTIONS — read carefully:
+- The conversation may contain tool calls and data from OTHER datasources (crunchbase, pitchbook, etc.). \
+IGNORE all of that. It is not yours. Do NOT use any information from other datasources in your output.
+- You MUST make your own tool calls with source="{datasource}". Always start by calling list_files \
+with source="{datasource}", then read the relevant files with source="{datasource}".
+- NEVER call a tool with any source value other than "{datasource}".
+- Base your output ONLY on data you personally read from {datasource} files.
+
 Follow this workflow:
-1. Only consider data files from the datasource {datasource}. Tool calls must include a source parameter with the value {datasource}.
-2. Use your list tool to discover what data files are available for the company from the datasource {datasource},
-3. Read files in parallel using your read tool and extract the relevant information from the source.
+1. Call list_files with source="{datasource}" to discover available data files.
+2. Call read_file (in parallel) with source="{datasource}" to read and extract relevant information.
+3. Produce your structured output based ONLY on {datasource} data you read.
 
 The output of your research is used to assemble a report by a coordinator agent.
-
-IMPORTANT: If you don't call a tool, explain why you didn't call it.
 """
 
 
@@ -56,7 +62,7 @@ def read_file(company_name: str, source: str, filename: str) -> str:
     path = DATASETS_DIR / company_name.lower() / source / filename
     if not path.exists():
         return "File not found."
-    return f"--- {path.name} ---\n{path.read_text()}"
+    return f"--- Source: {source}: {path.name} ---\n{path.read_text()}"
 
 
 COMMON_TOOLS = [list_files, read_file]

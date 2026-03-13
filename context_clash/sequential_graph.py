@@ -70,15 +70,10 @@ def strip_structured_responses(messages: list[AnyMessage]) -> list[AnyMessage]:
                 continue
         # Skip AI messages whose content is a CompanyInfo JSON (ProviderStrategy)
         if msg.type == "ai" and isinstance(msg.content, str) and msg.content.strip():
-            if not getattr(msg, "tool_calls", None) and _is_company_info_content(
-                msg.content
-            ):
+            if not getattr(msg, "tool_calls", None) and _is_company_info_content(msg.content):
                 continue
         # Skip tool responses for CompanyInfo calls
-        if (
-            msg.type == "tool"
-            and getattr(msg, "tool_call_id", None) in company_info_call_ids
-        ):
+        if msg.type == "tool" and getattr(msg, "tool_call_id", None) in company_info_call_ids:
             continue
         filtered.append(msg)
     return filtered
@@ -173,6 +168,6 @@ agent = graph
 
 if __name__ == "__main__":
     result = agent.invoke(
-        {"messages": [{"role": "user", "content": "Research the company Firebolt."}]}
+        {"messages": [{"role": "user", "content": "Research the company Materialize."}]}
     )
     print(result["structured_response"].model_dump_json(indent=2))

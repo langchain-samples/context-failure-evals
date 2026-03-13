@@ -63,3 +63,6 @@ class CompanyInfo(BaseModel):
         default=None,
         description="Source of the information",
     )
+    confirm_read_files: str = Field(
+        description="Confirm that you have read all relevant files for your source. If no files were read with the read_file tool call, explain why.",
+    )
