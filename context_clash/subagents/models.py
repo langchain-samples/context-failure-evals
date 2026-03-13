@@ -6,6 +6,8 @@ from pydantic import BaseModel, Field
 class CompanyInfo(BaseModel):
     """Extracted company information."""
 
+    model_config = {"extra": "forbid"}
+
     ceo_name: str | None = Field(default=None, description="Name of the CEO")
     cto_name: str | None = Field(
         default=None, description="Name of the CTO (if available)"
@@ -44,10 +46,6 @@ class CompanyInfo(BaseModel):
         default_factory=list,
         description="List of office location cities in alphabetical order. Use full city names, e.g. New York City, not just New York. Do not add country or state.",
     )
-    confidence_notes: str | None = Field(
-        default=None,
-        description="Notes about confidence level or data sources for the extracted information",
-    )
     source: (
         Literal[
             "company_homepage",
@@ -64,7 +62,4 @@ class CompanyInfo(BaseModel):
     ) = Field(
         default=None,
         description="Source of the information",
-    )
-    confirm_read_files: str = Field(
-        description="Confirm that you have read all relevant files for your source. If no files were read with the read_file tool call, explain why.",
     )

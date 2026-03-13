@@ -3,7 +3,8 @@ from langchain_openai import ChatOpenAI
 
 load_dotenv()
 
-model = ChatOpenAI(model="gpt-5-nano-2025-08-07")
+# model = ChatOpenAI(model="gpt-5-nano-2025-08-07")
+model = ChatOpenAI(model="gpt-5-mini-2025-08-07")
 research_model = ChatOpenAI(model="gpt-5.4-2026-03-05")
 
 _SHARED_BODY = """\
@@ -29,8 +30,7 @@ year_founded, office_locations):
 
 1. Use the homepage value if one exists. Stop.
 2. If homepage has no value → fall through tiers in order.
-3. If using a non-homepage value, justify in confidence_notes why the homepage was insufficient \
-(only valid reasons: no data on homepage, or intra-homepage conflict resolved by page recency).
+3. If homepage has no value for a field, use the next available tier.
 
 CRITICAL — absence is data for leadership roles:
 If the homepage team/about page lists leadership (e.g. CEO, VP) but does NOT list a CTO, \
@@ -45,14 +45,6 @@ Field-specific notes:
 if the team page omits a role entirely → output null or omit the field (position vacant)
 - headcount: homepage number wins over LinkedIn
 - year_founded, office_locations: homepage wins if stated
-
-## confidence_notes Format
-
-For each field, note the source used and any conflicts:
-- Homepage used: "ceo_name: X from homepage (team page). crunchbase listed Y — likely outdated."
-- Intra-homepage conflict: "cto_name: X from homepage (team page). 2021 press release said Y — \
-team page takes precedence."
-- Non-homepage used: "cto_name: X from crunchbase. JUSTIFICATION: homepage had no CTO listed."
 
 Sources: Company homepage, Crunchbase, LinkedIn, News articles, Twitter/X"""
 

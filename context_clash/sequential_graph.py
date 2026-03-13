@@ -34,12 +34,25 @@ class ResearchState(MessagesState):
 # --- Helpers ---
 
 
+def _is_company_info_content(content: str) -> bool:
+    """Check if message content is a CompanyInfo JSON response."""
+    try:
+        CompanyInfo.model_validate_json(content)
+        return True
+    except Exception:
+        return False
+
+
 def strip_structured_responses(messages: list[AnyMessage]) -> list[AnyMessage]:
-    """Remove CompanyInfo tool calls and their tool responses from messages.
+    """Remove CompanyInfo structured outputs from messages.
 
     Each subagent produces a CompanyInfo structured output after reading raw data.
     We strip these so only the raw data tool calls flow through the graph,
     keeping maximum "context clash" for the aggregator.
+
+    CompanyInfo outputs can appear as:
+    - Tool calls (when using ToolCallingStrategy)
+    - AI message content (when using ProviderStrategy / native structured output)
     """
     # Collect tool_call IDs for CompanyInfo calls
     company_info_call_ids: set[str] = set()
@@ -54,6 +67,12 @@ def strip_structured_responses(messages: list[AnyMessage]) -> list[AnyMessage]:
         # Skip AI messages whose only tool calls are CompanyInfo
         if msg.type == "ai" and getattr(msg, "tool_calls", None):
             if all(tc["name"] == "CompanyInfo" for tc in msg.tool_calls):
+                continue
+        # Skip AI messages whose content is a CompanyInfo JSON (ProviderStrategy)
+        if msg.type == "ai" and isinstance(msg.content, str) and msg.content.strip():
+            if not getattr(msg, "tool_calls", None) and _is_company_info_content(
+                msg.content
+            ):
                 continue
         # Skip tool responses for CompanyInfo calls
         if (
