@@ -3,11 +3,12 @@ name = "context-failure"
 version = "0.1.0"
 description = "Common context failure cases in AI Agents, as well as solutions using LangSmith evaluations"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.14"
 license = {text = "MIT"}
 authors = [
     {name = "Christine Astoria", email = "christine@langchain.dev"}, 
-    {name = "Robert Xu", email = "xuro@langchain.dev"}
+    {name = "Robert Xu", email = "xuro@langchain.dev"},
+    {name = "Steffen Hausmann", email = "steffen@langchain.dev"}
 ]
 
 dependencies = [
@@ -38,7 +39,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["context_confusion*", "context_distraction*", "context_poisoning*"]
+include = ["context_clash*", "context_confusion*", "context_distraction*", "context_poisoning*"]
 
 [tool.ruff]
 line-length = 100
