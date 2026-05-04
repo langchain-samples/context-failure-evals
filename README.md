@@ -40,6 +40,14 @@ context-failure-evals/
 │   ├── resources/                        # Mock APIs and test tasks
 │   ├── tests/                            # Evaluators and dataset utilities
 │   └── debug/                            # Claude Code debugging utilities
+├── context_clash/
+│   ├── sequential_graph.py              # Sequential subagents with shared context
+│   ├── subagents_as_tools.py            # Coordinator with quarantined subagents
+│   ├── subagents/                       # Per-source subagents (homepage, Crunchbase, ...)
+│   ├── model.py                         # Shared CompanyInfo output schema
+│   ├── helpers.py                       # Agent helpers
+│   ├── create_dataset.py                # Dataset generation
+│   └── datasets/                        # Synthetic company data across 8 sources
 └── context_poisoning/
     ├── agent.py                          # Task management agent
     ├── tools.py                          # Task and goal management tools
@@ -91,9 +99,21 @@ Demonstrates how **context distraction** - accumulated tool call results over lo
 
 **Debugging utilities:** Includes Claude Code debugging scripts in `context_distraction/debug/` for inspecting traces and agent behavior
 
-### 3. Context Clash
+### 3. Context Clash (`notebooks/context_clash.ipynb`)
 
-*Coming soon*
+Demonstrates how **context clash** - contradictory information accumulating in a shared context window - causes agents to anchor on early, incomplete answers even after later turns provide the correct information.
+
+**The Problem:** A company research agent gathers information about a startup from 8 sources (homepage, Crunchbase, PitchBook, LinkedIn, Glassdoor, news, Wikipedia, Twitter). Each source mixes correct, outdated, and outright wrong data. When subagents append their raw results to a shared message history, the aggregator must reconcile hundreds of conflicting data points at once, and early misinformation anchors its reasoning even when the prompt specifies clear source-priority rules.
+
+**Two architectures compared:**
+1. **Sequential graph (shared context)** - 8 subagents run in sequence, each appending raw results to a shared history before a final aggregator produces the answer
+2. **Subagents-as-tools (context quarantine)** - A coordinator invokes each per-source subagent as a tool; subagents run in isolated contexts and return only summaries
+
+**Key insights:**
+- Both architectures use identical subagents, prompts, and output schema. The only difference is context management
+- Context quarantine improves accuracy because contradictions never cross subagent boundaries and the coordinator works from clean, attributed summaries
+- It is also cheaper: ~50k tokens for the quarantined architecture vs. ~300k for the sequential graph in the example run
+- Better prompting alone does not fix context clash; the fix is structural
 
 ### 4. Context Poisoning (`notebooks/context_poisoning_demo.ipynb`)
 
